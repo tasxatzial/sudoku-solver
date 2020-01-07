@@ -355,9 +355,12 @@ static void sudoku_set_rules(Grid_T *grid) {
     return;
 }
 
+
 /* sudoku_try_next
 
-Finds a cell of grid that has the min number of available choices.
+Finds a grid cell that has the minimum number of available choices and sets
+the content of row, col pointers equal to the row, col of the cell.
+If such cell does not exist, the content or row, col pointers is set to -1.
 
 Checks: if row and col are NULL at runtime.
 
@@ -366,74 +369,64 @@ grid: a Grid_T type.
 row: pointer to a row number.
 col: pointer to a column number.
 
-Returns: the value of a cell that has the min non-0 number of available
-choices and sets the row and col parameters to point to the row and column
-of that cell. It returns 0 in all other cases */
+Returns: One of the available choices if there is a cell with a min number of
+available choices, 0 otherwise */
 static int sudoku_try_next(Grid_T grid, int *row, int *col) {
-    int k, rowi, colj, val, count, count_min, found;
+    int rowi, colj, val, count, count_min, num_scanned, non_empty;
 
     assert(row);
     assert(col);
-    count_min = SIZE + 1;
-    for (rowi = 0; rowi < SIZE; rowi++) {
-        for (colj = 0; colj < SIZE; colj++) {
+    *row = -1;
+    *col = -1;
+    num_scanned = 0;
+    non_empty = 0;
+    count_min = CHOICES;
+
+    /* Pick a random cell (rowi, colj) and scan grid horizontally starting
+    from (rowi, colj) */
+    rowi = rand() % SIZE;
+    colj = rand() % SIZE;
+    while (num_scanned != SIZE*SIZE) {
+        while (colj != SIZE && num_scanned != SIZE*SIZE) {
             val = grid_read_value(grid, rowi, colj);
 
             /* skip non empty cells */
             if (val) {
+                non_empty++;
+                colj++;
+                num_scanned++;
                 continue;
             }
 
+            /* puzzle is invalid if there is a cell with 0 choices */
             count = grid_read_count(grid, rowi, colj);
-
-            /* stop searching if count = 0 */
-            if (!count) {
+            if (count == 0) {
                 return 0;
             }
 
-            /* find the minimum number of choices */
+            /* update min number of choices */
             if (count < count_min) {
-                count_min = count;
-            }
-        }
-    }
-
-    /* return 0 if all cells have 0 choices */
-    if (count_min == SIZE + 1) {
-        return 0;
-    }
-
-    /* find a cell that has the minimum number of choices. Scan grid starting
-    from (rowi, colj) and warp around when in last cell */
-    rowi = rand() % SIZE;
-    colj = rand() % SIZE;
-    found = 0;
-    while (1) {
-        k = 0;
-        while (k != SIZE) {
-            if (grid_read_count(grid, rowi, colj) == count_min) {
                 *row = rowi;
                 *col = colj;
-                found = 1;
-                break;
+                count_min = count;
             }
             colj++;
-            if (colj == SIZE) {
-                colj = 0;
-            }
-            k++;
-        }
-        if (found) {
-            break;
+            num_scanned++;
         }
         rowi++;
         if (rowi == SIZE) {
             rowi = 0;
         }
+        colj = 0;
     }
 
-    /* select a random choice val. Search for a valid one starting from
-    val, warp around when in last choice */
+    /* there is no cell with a minimum number of choices if all cells are
+    non empty */
+    if (non_empty == SIZE*SIZE) {
+        return 0;
+    }
+
+    /* we have a cell selected, return one of its available choices */
     val = rand() % SIZE + 1;
     while (1) {
         if (grid_choice_is_valid(grid, *row, *col, val)) {
