@@ -1,6 +1,4 @@
-/* Sudoku generator/solver.
-
-Uses lower level functions declared in grid.h */
+/* Sudoku generator/solver library */
 
 #ifndef _PUZZLE_H_
 #define _PUZZLE_H_

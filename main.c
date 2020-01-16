@@ -1,6 +1,4 @@
-/* Test file for the sudoku interface.
-
-Uses functions declared in puzzle.h */
+/* Test file for the sudoku library */
 
 #include <stdio.h>
 #include <stdlib.h>
