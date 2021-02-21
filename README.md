@@ -1,8 +1,6 @@
-# Sudoku
+# Sudoku library
 
-## Description
-
-[Sudoku](https://en.wikipedia.org/wiki/Sudoku) solver/generator library.
+A solver/generator library for [Sudoku](https://en.wikipedia.org/wiki/Sudoku) puzzles.
 
 The following functions are provided:
 
@@ -16,29 +14,19 @@ The following functions are provided:
 
 ## Implementation
 
-Sudokus are solved using the Backtracking algorithm.
+Sudokus are solved using a Backtracking algorithm.
 
 ## Compile
 
-Use the provided Makefile:
-
-### Building the library
+Build the library:
 
 ```bash
 make puzzle.o
 ```
 
-### Building the test files
-
-```bash
-make sudoku
-```
-
-Running the tests is explained in the next section.
-
 ## Typical usage
 
-* Read a sudoku from input_file and if possible, solve it:
+* Read a sudoku from input_file and attemp to solve it:
 
 ```bash
 ./sudoku < input_file
@@ -72,8 +60,16 @@ solve (if you are a human).
 ./sudoku -g 40 | ./sudoku
 ```
 
-Note: If the puzzle has multiple solutions, one of them is returned.
+Note: If the puzzle has multiple solutions one of them is returned.
 
-## Sample files
+## Tests
 
-See [tests](tests).
+Using the library is demonstrated in [main.c](main.c).
+
+Build:
+
+```bash
+make sudoku
+```
+
+Use the files in [tests](tests/) folder to run the tests.
