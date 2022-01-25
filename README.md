@@ -62,9 +62,9 @@ solve (if you are a human).
 
 Note: If the puzzle has multiple solutions one of them is returned.
 
-## Tests
+## Example puzzles
 
-Using the library is demonstrated in [main.c](main.c).
+Using the library is demonstrated in [main.c](src/main.c).
 
 Build:
 
@@ -72,4 +72,4 @@ Build:
 make sudoku
 ```
 
-Use the files in [tests](tests/) folder to run the tests.
+[Puzzles](puzzles/) folder contains a selection of unsolved puzzles.
