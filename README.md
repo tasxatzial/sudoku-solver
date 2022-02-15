@@ -16,6 +16,10 @@ The following functions are provided:
 
 Sudokus are solved using a Backtracking algorithm.
 
+## Profiling
+
+The program has been tested for memory leaks with [AddressSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer).
+
 ## Compile
 
 Build the library:
