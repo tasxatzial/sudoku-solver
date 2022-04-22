@@ -1,16 +1,16 @@
 CFLAGS = -c -ansi -Wall -pedantic
 
-sudoku: main.o puzzle.o grid.o
-	gcc main.o puzzle.o grid.o -o sudoku
+sudoku-ui: sudoku-ui.o sudoku.o grid.o
+	gcc sudoku-ui.o sudoku.o grid.o -o sudoku-ui
 
-main.o: main.c puzzle.h
-	gcc $(CFLAGS) main.c
+sudoku-ui.o: sudoku-ui.c sudoku.h grid.h
+	gcc $(CFLAGS) sudoku-ui.c
 
-puzzle.o: puzzle.c puzzle.h grid.h
-	gcc $(CFLAGS) puzzle.c
+puzzle.o: sudoku.c sudoku.h grid.h
+	gcc $(CFLAGS) sudoku.c
 
 grid.o: grid.c grid.h
 	gcc $(CFLAGS) grid.c
 
 clean:
-	rm -f *.o sudoku
+	rm -f *.o sudoku-ui

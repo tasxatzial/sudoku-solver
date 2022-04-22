@@ -6,7 +6,7 @@ Uses lower level functions declared in grid.h */
 #include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "puzzle.h"
+#include "sudoku.h"
 
 static Grid_T sudoku_generate_complete(void);
 static void sudoku_init_choices(Grid_T *grid);
