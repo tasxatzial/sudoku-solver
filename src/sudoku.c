@@ -19,8 +19,8 @@ static void sudoku_add_choice(Grid_T *grid, int row, int col, int val);
 
 /* sudoku_read: Reads a sudoku puzzle from stdin.
 
-The input can have the format:
-1 2 3 4 5 6 7 8 9 
+The input should have the format:
+. 0 3 4 5 6 7 8 9 
 4 5 6 7 8 9 1 2 3
 7 8 9 1 2 3 4 5 6
 2 3 4 5 6 7 8 9 1 
@@ -30,22 +30,31 @@ The input can have the format:
 6 7 8 9 1 2 3 4 5 
 9 1 2 3 4 5 6 7 8 
 
-Between each value the allows characters are: space, CR, CRLF. Values 0
-indicate empty cells and these can also be represented by a '.'
+Between each value there should be a space char. New lines are denoted by a
+LF char right after the last digit. A '0' or '.' indicates an empty cell.
 
 Parameters: void
 
-Returns: a Grid_T type */
+Returns: a Grid_T type  */
 Grid_T sudoku_read(void) {
     int i, j, val;
     Grid_T sudoku;
 
     for (i = 0; i < SIZE; i++) {
+        if (i != 0) {
+            val = getchar();
+
+            /* check if we read a LF */
+            if (val != 10) {
+                grid_clear_formatok(&sudoku);
+                return sudoku;
+            }
+        }
         for (j = 0; j < SIZE; j++) {
             val = getchar();
 
-            /* keep reading until none of these */
-            while (val == ' ' || val == 13 || val == 10) {
+            /* read next char if we read a space */
+            if (val == ' ') {
                 val = getchar();
             }
 
@@ -54,9 +63,15 @@ Grid_T sudoku_read(void) {
                 val = '0';
             }
             
+            /* check if we are reading a digit */
+            if (val < 48 || val > 57) {
+                grid_clear_formatok(&sudoku);
+                return sudoku;
+            }
             grid_update_value(&sudoku, i, j, val - '0');
         }
     }
+    grid_set_formatok(&sudoku);
     grid_reset_unique(&sudoku);
     grid_reset_rulesok(&sudoku);
     grid_clear_initialized(&sudoku);
@@ -64,11 +79,23 @@ Grid_T sudoku_read(void) {
 }
 
 
-/* sudoku_print
+/* sudoku_format_is_correct
 
-Writes a sudoku puzzle grid to stream. The format is
-9 numbers per line and after a number there is a space. Each line is
-terminated by LF.
+Checks if the Grid_T returned by sudoku_read() has the correct format.
+
+Parameters:
+grid: a Grid_T type.
+
+Returns: 1 if the format is OK, 0 otherwise */
+int sudoku_format_is_correct(Grid_T grid) {
+    return grid_read_formatok(grid);
+}
+
+
+/* sudoku_print: Writes a sudoku puzzle grid to stream.
+
+The format is 9 numbers per line and after each number there is a space char.
+After the last number in each line there is a LF char.
 
 Checks: if stream is NULL at runtime.
 
@@ -84,7 +111,12 @@ void sudoku_print(FILE *stream, Grid_T grid) {
     for (i = 0; i < SIZE; i++) {
         for (j = 0; j < SIZE; j++) {
             val = grid_read_value(grid, i, j);
-            fprintf(stream, "%d ", val);
+            if (j == SIZE - 1) {
+                fprintf(stream, "%d", val);
+            }
+            else {
+                fprintf(stream, "%d ", val);
+            }
         }
         fprintf(stream, "\n");
     }

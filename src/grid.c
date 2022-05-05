@@ -356,3 +356,42 @@ up to date, 0 otherwise */
 int grid_is_initialized(Grid_T grid) {
     return grid.initialized;
 }
+
+
+/* grid_set_formatok
+
+Sets the formatok field of grid to 1, meaning all grid cells have valid values.
+
+Checks: if grid is NULL at runtime
+
+Returns: void */
+void grid_set_formatok(Grid_T *grid) {
+    grid->formatok = 1;
+}
+
+
+/* grid_clear_formatok
+
+Sets the formatok field of grid to 0, meaning the grid has at least one invalid 
+cell value.
+
+Checks: if grid is NULL at runtime
+
+Returns: void */
+void grid_clear_formatok(Grid_T *grid) {
+    assert(grid);
+    grid->formatok = 0;
+}
+
+
+/* grid_read_formatok
+
+Reads the formatok field of grid.
+
+Parameters:
+grid: a Grid_T type
+
+Returns: 1 if the format is OK, 0 otherwise */
+int grid_read_formatok(Grid_T grid) {
+    return grid.formatok;
+}

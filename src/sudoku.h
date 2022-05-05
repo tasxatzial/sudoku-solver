@@ -9,19 +9,19 @@
 
 /* sudoku_read: Reads a sudoku puzzle from stdin.
 
-The input can have the format:
-1 2 3 4 5 6 7 8 9 
+The input should have the format:
+. 0 3 4 5 6 7 8 9
 4 5 6 7 8 9 1 2 3
 7 8 9 1 2 3 4 5 6
-2 3 4 5 6 7 8 9 1 
+2 3 4 5 6 7 8 9 1
 5 6 7 8 9 1 2 3 4
-8 9 1 2 3 4 5 6 7 
+8 9 1 2 3 4 5 6 7
 3 4 5 6 7 8 9 1 2
-6 7 8 9 1 2 3 4 5 
-9 1 2 3 4 5 6 7 8 
+6 7 8 9 1 2 3 4 5
+9 1 2 3 4 5 6 7 8
 
-Between each value the allows characters are: space, CR, CRLF. Values 0
-indicate empty cells and these can also be represented by a '.'
+Between each value there should be a space char. New lines are denoted by a
+LF char right after the last digit. A '0' or '.' indicates an empty cell.
 
 Parameters: void
 
@@ -29,11 +29,21 @@ Returns: a Grid_T type */
 Grid_T sudoku_read(void);
 
 
-/* sudoku_print
+/* sudoku_format_is_correct
 
-Writes a sudoku puzzle grid to stream. The format is
-9 numbers per line and after a number there is a space. Each line is
-terminated by LF.
+Checks if the Grid_T returned by sudoku_read() has the correct format.
+
+Parameters:
+grid: a Grid_T type.
+
+Returns: 1 if the format is OK, 0 otherwise */
+int sudoku_format_is_correct(Grid_T grid);
+
+
+/* sudoku_print: Writes a sudoku puzzle grid to stream.
+
+The format is 9 numbers per line and after each number there is a space char.
+After the last number in each line there is a LF char.
 
 Checks: if stream is NULL at runtime.
 
