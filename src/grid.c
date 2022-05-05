@@ -262,6 +262,7 @@ grid: pointer to a Grid_T type
 
 Returns: void */
 void grid_set_rulesok(Grid_T *grid) {
+    assert(grid);
     grid->rulesok = 1;
 }
 
@@ -278,6 +279,7 @@ grid: pointer to a Grid_T type
 
 Returns: void */
 void grid_clear_rulesok(Grid_T *grid) {
+    assert(grid);
     grid->rulesok = 0;
 }
 
@@ -294,6 +296,7 @@ grid: pointer to a Grid_T type
 
 Returns: void */
 void grid_reset_rulesok(Grid_T *grid) {
+    assert(grid);
     grid->rulesok = -1;
 }
 
@@ -324,6 +327,7 @@ grid: pointer to a Grid_T type
 
 Returns: void */
 void grid_set_initialized(Grid_T *grid) {
+    assert(grid);
     grid->initialized = 1;
 }
 
@@ -340,6 +344,7 @@ grid: pointer to a Grid_T type
 
 Returns: void */
 void grid_clear_initialized(Grid_T *grid) {
+    assert(grid);
     grid->initialized = 0;
 }
 
@@ -366,6 +371,7 @@ Checks: if grid is NULL at runtime
 
 Returns: void */
 void grid_set_formatok(Grid_T *grid) {
+    assert(grid);
     grid->formatok = 1;
 }
 
