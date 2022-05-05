@@ -290,9 +290,11 @@ when the function returns.
 
 Parameters:
 grid: a Grid_T type.
+rules_only: Any value will print only the cells that violate rules, 0 will
+also include empty cells.
 
 Returns: void */
-void sudoku_print_errors(Grid_T grid) {
+void sudoku_print_errors(Grid_T grid, int rules_only) {
     int k;
 
     /* Show errors related to numbers appearing twice in the same column */
@@ -316,7 +318,9 @@ void sudoku_print_errors(Grid_T grid) {
     }
 
     /* Show errors related to empty cells */
-    sudoku_errors_zero(grid, 1);
+    if (!rules_only) {
+        sudoku_errors_zero(grid, 1);
+    }
     return;
 }
 
@@ -329,9 +333,14 @@ the function returns.
 
 Parameters:
 grid: a Grid_T type.
+rules_only: Any value will check only for rules violation, 0 will
+also include empty cells.
 
-Returns: 1 if there are no errors, 0 otherwise. */
-int sudoku_is_correct(Grid_T grid) {
+Returns:
+rules_only != 0: 1 if puzzle is fully completed and does not violate rules,
+                 0 otherwise.
+rules_only = 0: 1 if puzzle violates only rules, 0 otherwise. */
+int sudoku_is_correct(Grid_T grid, int rules_only) {
 
     /* Find errors related to numbers appearing twice in the same 
     row/column/clock */
@@ -348,7 +357,7 @@ int sudoku_is_correct(Grid_T grid) {
     }
 
     /* Find errors related to empty cells */
-    if (sudoku_errors_zero(grid, 0)) {
+    if (!rules_only && sudoku_errors_zero(grid, 0)) {
         return 0;
     }
     return 1;
@@ -603,7 +612,7 @@ static Grid_T sudoku_generate_complete(void) {
         }
 
         /* puzzle is correct if it is fully completed */
-        if (sudoku_is_correct(sudoku)) {
+        if (sudoku_is_correct(sudoku, 0)) {
             return sudoku;
         }
     }
@@ -788,7 +797,7 @@ Grid_T sudoku_solve(Grid_T grid) {
             gtmp = sudoku_solve(gtmp);
 
             /* return the copy if solution is correct */
-            if (sudoku_is_correct(gtmp)) {
+            if (sudoku_is_correct(gtmp, 0)) {
                 return gtmp;
             }
 
@@ -800,7 +809,7 @@ Grid_T sudoku_solve(Grid_T grid) {
     }
 
     /* clear unique if puzzle not correct */
-    if (grid_read_unique(grid) && !sudoku_is_correct(grid)) {
+    if (grid_read_unique(grid) && !sudoku_is_correct(grid, 0)) {
         grid_clear_unique(&grid);
     }
     return grid;

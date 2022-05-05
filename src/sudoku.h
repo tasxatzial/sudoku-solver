@@ -66,9 +66,11 @@ when the function returns.
 
 Parameters:
 grid: a Grid_T type.
+rules_only: Any value will print only the cells that violate rules, 0 will
+also include empty cells.
 
 Returns: void */
-void sudoku_print_errors(Grid_T grid);
+void sudoku_print_errors(Grid_T grid, int rules_only);
 
 
 /* sudoku_is_correct
@@ -79,9 +81,14 @@ the function returns.
 
 Parameters:
 grid: a Grid_T type.
+rules_only: Any value will check only for rules violation, 0 will
+also include empty cells.
 
-Returns: 1 if there are no errors, 0 otherwise. */
-int sudoku_is_correct(Grid_T grid);
+Returns:
+rules_only != 0: 1 if puzzle is fully completed and does not violate rules,
+                 0 otherwise.
+rules_only = 0: 1 if puzzle violates only rules, 0 otherwise. */
+int sudoku_is_correct(Grid_T grid, int rules_only);
 
 
 /* sudoku_solve

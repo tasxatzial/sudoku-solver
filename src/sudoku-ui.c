@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
         sudoku = sudoku_read();
         sudoku_print(stderr, sudoku);
         sudoku_solved = sudoku_solve(sudoku);
-        correct = sudoku_is_correct(sudoku_solved);
+        correct = sudoku_is_correct(sudoku_solved, 0);
         if (sudoku_solution_is_unique(sudoku_solved)) {
             fprintf(stderr, "Puzzle has a (unique choice) solution:\n");
         }
@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
         }
         sudoku_print(stdout, sudoku_solved);
         if (!correct) {
-            sudoku_print_errors(sudoku_solved);
+            sudoku_print_errors(sudoku_solved, 0);
         }
     }
     else if (argc == 3) {   /* argument -g <nelts> */
@@ -94,12 +94,12 @@ int main(int argc, char **argv) {
         }
         else {
             sudoku_print(stderr, sudoku);
-            if (sudoku_is_correct(sudoku)) {
+            if (sudoku_is_correct(sudoku, 0)) {
                 fprintf(stderr, "Puzzle is correct\n");
             }
             else {
                 fprintf(stderr, "Puzzle is not correct:\n");
-                sudoku_print_errors(sudoku);
+                sudoku_print_errors(sudoku, 0);
             }
         }
     }
