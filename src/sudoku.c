@@ -585,6 +585,7 @@ static Grid_T sudoku_generate_complete(void) {
     grid_set_unique(&sudoku);
     grid_set_rulesok(&sudoku);
     grid_clear_initialized(&sudoku);
+    grid_set_formatok(&sudoku);
     
     /* try to generate a full puzzle 10 times */
     for (tries = 0; tries < 10; tries++) {
