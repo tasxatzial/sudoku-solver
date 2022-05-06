@@ -6,7 +6,7 @@ sudoku-ui: sudoku-ui.o sudoku.o grid.o
 sudoku-ui.o: sudoku-ui.c sudoku.h grid.h
 	gcc $(CFLAGS) sudoku-ui.c
 
-puzzle.o: sudoku.c sudoku.h grid.h
+sudoku.o: sudoku.c sudoku.h grid.h
 	gcc $(CFLAGS) sudoku.c
 
 grid.o: grid.c grid.h
