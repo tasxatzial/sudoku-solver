@@ -5,12 +5,13 @@ A solver/generator library for [Sudoku](https://en.wikipedia.org/wiki/Sudoku) pu
 The following functions are provided:
 
 * sudoku_read(): Read a puzzle
-* sudoku_print(puzzle): Print a puzzle
-* sudoku_print_errors(puzzle): Print all puzzle errors including empty cells
-* sudoku_is_correct(puzzle): Check whether a puzzle is fully completed and does not have any errors
+* sudoku_print(puzzle): Print puzzle
+* sudoku_print_errors(puzzle): Print puzzle issues (rules violation, empty cells)
+* sudoku_format_is_correct(puzzle): Show whether puzzle meets the required format
+* sudoku_is_correct(puzzle): Check whether puzzle has issues (rules violation, empty cells)
 * sudoku_solve(puzzle): Solve a puzzle
 * sudoku_generate(N): Generate puzzle that has N non empty cells
-* sudoku_solution_is_unique(puzzle): Show whether a puzzle has a unique choice solution
+* sudoku_has_unique_choice_solution(puzzle): Show whether a puzzle has a unique choice solution
 
 ## Implementation
 
@@ -18,7 +19,7 @@ Sudokus are solved using a [backtracking](https://en.wikipedia.org/wiki/Backtrac
 
 ## Profiling
 
-The program has been tested for memory leaks with [AddressSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer).
+The program has been tested for memory leaks with [valgrind](https://valgrind.org/) and [AddressSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer).
 
 ## Compile
 
@@ -36,7 +37,7 @@ make sudoku-ui
 
 ## Typical usage
 
-* Read a sudoku from input_file and attemp to solve it:
+* Read a sudoku from input_file and solve it:
 
 ```bash
 ./sudoku-ui < input_file
@@ -54,22 +55,21 @@ make sudoku-ui
 ./sudoku-ui -s < input_file
 ```
 
-* Generate a unique choice solvable sudoku with 40 non-zero numbers:
+* Generate a solvable sudoku with 40 non-zero numbers:
 
 ```bash
 ./sudoku-ui -g 40
 ```
 
-Note: If N is very low, a unique choice puzzle may not be possible. In that case the program returns a
-puzzle where at each step multiple cells can be filled in.
+Note: If N is very low, a unique choice puzzle may not be possible. Unique choice solvable puzzle means that there is only one cell that can be filled in at each step of the solution.
 
-* Generate a unique choice solvable sudoku with 40 non-zero numbers and solve it:
+* Generate a solvable sudoku with 40 non-zero numbers and solve it:
 
 ```bash
-./sudoku-ui -g 40 | ./sudoku
+./sudoku-ui -g 40 | ./sudoku-ui
 ```
 
-Note: If the puzzle has multiple solutions, one of them is returned.
+Note: The puzzle may have more than one solutions if it is not unique choice solvable. In that case only one solution is returned.
 
 ## Example puzzles
 
