@@ -772,11 +772,6 @@ Grid_T sudoku_solve(Grid_T grid) {
         grid_set_initialized(&grid);
     }
 
-    /* set unique for non auto generated puzzles */
-    if (grid_read_unique(grid) == -1) {
-        grid_set_unique(&grid);
-    }
-
     /* find a cell with min number of choices  */
     while ((val = sudoku_try_next(grid, &row, &col))) {
 
