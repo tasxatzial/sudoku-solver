@@ -6,8 +6,8 @@
 #include <unistd.h>
 #include "sudoku.h"
 
-int checkarg(int argc, char **argv);
-
+int has_valid_arguments(int argc, char **argv);
+void print_help(char *exec_name);
 
 /* main
 
@@ -38,6 +38,11 @@ int main(int argc, char **argv) {
     Grid_T sudoku, sudoku_solved;
     int nelts;
 
+    if (!has_valid_arguments(argc, argv)) {
+        print_help(argv[0]);
+        return 0;
+    }
+
     srand(getpid());
     if (argc == 1) {        /* no arguments */
         sudoku = sudoku_read();
@@ -58,17 +63,14 @@ int main(int argc, char **argv) {
             return 0;
         }
         if (sudoku_solution_is_unique(sudoku_solved)) {
-            fprintf(stderr, "Puzzle has one (unique choice) solution:\n");
+            fprintf(stdout, "Puzzle has one (unique choice) solution:\n");
         }
         else {
-            fprintf(stderr, "Puzzle has a solution (multiple solutions may exist):\n");
+            fprintf(stdout, "Puzzle has a solution (multiple solutions may exist):\n");
         }
         sudoku_print(sudoku_solved);
     }
     else if (argc == 3) {   /* argument -g <nelts> */
-        if (checkarg(argc, argv)) {
-            return 0;
-        }
         nelts = atoi(argv[2]);
         sudoku = sudoku_generate(nelts);
         if (sudoku_solution_is_unique(sudoku)) {
@@ -79,8 +81,9 @@ int main(int argc, char **argv) {
         }
         sudoku_print(sudoku);
     }
-    else if (argc == 2) {   /* argument -c, -s, -h */
-        if (checkarg(argc, argv)) { /* -h */
+    else if (argc == 2) {   /* argument -c, -s */
+        if (!strcmp(argv[1], "-h")) { /* -h */
+            print_help(argv[0]);
             return 0;
         }
         sudoku = sudoku_read();
@@ -100,7 +103,26 @@ int main(int argc, char **argv) {
 }
 
 
-/* checkarg
+/* print_help
+
+Prints the help message
+
+Parameters:
+exec_name: the executable name */
+void print_help(char *exec_name) {
+    fprintf(stderr, "Usage: %s [option]\n", exec_name);
+    fprintf(stderr, "Options (only one option can be used at a time):\n");
+    fprintf(stderr, "  -h\t\tDisplay this information\n");
+    fprintf(stderr, "  -c\t\tReads a sudoku puzzle from stdin");
+    fprintf(stderr, " and checks its correctness\n");
+    fprintf(stderr, "  -s\t\tReads a sudoku puzzle from stdin");
+    fprintf(stderr, " and prints it to stdout\n");
+    fprintf(stderr, "  -g <number>\tGenerates a sudoku puzzle");
+    fprintf(stderr, " with approximately <number> completed cells\n");
+}
+
+
+/* has_valid_arguments
 
 Checks that the command line arguments indicated by the parameters argc and
 argv have the expected format and prints a help message. Only
@@ -109,46 +131,32 @@ the following arguments are considered valid:
 -g <nelts>  (1 <= nelts <= 81)
 -c
 -s
-Any combination of the above arguments will be rejected and the help message
-will be displayed.
+
+Any combination of the above arguments is considered invalid.
 
 Parameters:
 argc: number of command line arguments
 argv: the command line arguments
 
-Returns: 0 if the arguments are valid, 0 otherwise. */
-int checkarg(int argc, char **argv) {
-    int err = 0;
+Returns: 1 if the arguments are valid, 0 otherwise. */
+int has_valid_arguments(int argc, char **argv) {
+    int valid = 1;
 
     if (argc == 3) {
         if (strcmp(argv[1], "-g")) {
-            err = 1;
+            valid = 0;
         }
         if (!atoi(argv[2])) {
-            err = 1;
+            valid = 0;
         }
     }
     else if (argc == 2) {
         if (strcmp(argv[1], "-c") && strcmp(argv[1], "-s")) {
-            err = 1;
+            valid = 0;
         }
         else if (!strcmp(argv[1], "-h")) {
-            err = 1;
+            valid = 0;
         }
     }
-    else {
-        err = 1;
-    }
-    if (err) {
-        fprintf(stderr, "Usage: %s [option]\n", argv[0]);
-        fprintf(stderr, "Options (only one option can be used at a time):\n");
-        fprintf(stderr, "  -h\t\tDisplay this information\n");
-        fprintf(stderr, "  -c\t\tReads a sudoku puzzle from stdin");
-        fprintf(stderr, " and checks its correctness\n");
-        fprintf(stderr, "  -s\t\tReads a sudoku puzzle from stdin");
-        fprintf(stderr, " and prints it to stdout\n");
-        fprintf(stderr, "  -g <number>\tGenerates a sudoku puzzle");
-        fprintf(stderr, " with approximately <number> completed cells\n");
-    }
-    return err;
+    return valid;
 }
