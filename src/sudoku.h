@@ -40,24 +40,21 @@ Returns: 1 if the format is OK, 0 otherwise */
 int sudoku_format_is_correct(Grid_T grid);
 
 
-/* sudoku_print: Writes a sudoku puzzle grid to stream.
+/* sudoku_print: Writes a sudoku puzzle grid to stdout.
 
 The format is 9 numbers per line and after each number there is a space char.
 After the last number in each line there is a LF char.
 
-Checks: if stream is NULL at runtime.
-
 Parameters:
-stream: stream to write to.
 grid: a Grid_T type.
 
 Returns: void */
-void sudoku_print(FILE *stream, Grid_T grid);
+void sudoku_print(Grid_T grid);
 
 
 /* sudoku_print_errors
 
-Writes to stderr all errors of grid including:
+Writes to stdout all errors of grid including:
     Errors related to numbers appearing twice in the same row/column/block.
     Errors related to empty cells.
 

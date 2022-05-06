@@ -48,27 +48,34 @@ Any combination of the above arguments will be rejected and the help message
 will be displayed. */
 int main(int argc, char **argv) {
     Grid_T sudoku, sudoku_solved;
-    int nelts, correct;
+    int nelts;
 
     srand(getpid());
     if (argc == 1) {        /* no arguments */
         sudoku = sudoku_read();
-        sudoku_print(stderr, sudoku);
-        sudoku_solved = sudoku_solve(sudoku);
-        correct = sudoku_is_correct(sudoku_solved, 0);
-        if (sudoku_solution_is_unique(sudoku_solved)) {
-            fprintf(stderr, "Puzzle has a (unique choice) solution:\n");
+        if (!sudoku_format_is_correct(sudoku)) {
+            fprintf(stdout, "Puzzle has incorrect format. Exiting...\n");
+            return 0;
         }
-        else if (!correct) {
-            fprintf(stderr, "Puzzle has no solutions\n");
+        fprintf(stderr, "Input puzzle:\n");
+        sudoku_print(sudoku);
+        if (!sudoku_is_correct(sudoku, 1)) {
+            fprintf(stdout, "Puzzle violates rules:\n");
+            sudoku_print_errors(sudoku, 1);
+            return 0;
+        }
+        sudoku_solved = sudoku_solve(sudoku);
+        if (!sudoku_is_correct(sudoku_solved, 0)) {
+            fprintf(stdout, "Puzzle has no solutions\n");
+            return 0;
+        }
+        if (sudoku_solution_is_unique(sudoku_solved)) {
+            fprintf(stderr, "Puzzle has one (unique choice) solution:\n");
         }
         else {
-            fprintf(stderr, "Puzzle has a solution:\n");
+            fprintf(stderr, "Puzzle has a solution (multiple solutions may exist):\n");
         }
-        sudoku_print(stdout, sudoku_solved);
-        if (!correct) {
-            sudoku_print_errors(sudoku_solved, 0);
-        }
+        sudoku_print(sudoku_solved);
     }
     else if (argc == 3) {   /* argument -g <nelts> */
         if (checkarg(argc, argv)) {
@@ -77,30 +84,28 @@ int main(int argc, char **argv) {
         nelts = atoi(argv[2]);
         sudoku = sudoku_generate(nelts);
         if (sudoku_solution_is_unique(sudoku)) {
-            fprintf(stderr, "New (unique choice) solvable puzzle:\n");
+            fprintf(stderr, "Generating (unique choice) solvable puzzle...\n");
         }
         else {
-            fprintf(stderr, "New solvable puzzle:\n");
+            fprintf(stderr, "Generating solvable puzzle (multiple solutions may exist)...\n");
         }
-        sudoku_print(stdout, sudoku);
+        sudoku_print(sudoku);
     }
     else if (argc == 2) {   /* argument -c, -s, -h */
-        if (checkarg(argc, argv)) {
+        if (checkarg(argc, argv)) { /* -h */
             return 0;
         }
         sudoku = sudoku_read();
-        if (!strcmp(argv[1], "-s")) {
-            sudoku_print(stdout, sudoku);
+        sudoku_print(sudoku);
+        if (!strcmp(argv[1], "-s")) { /* -s */
+            return 0;
+        }
+        if (!sudoku_is_correct(sudoku, 0)) {
+            fprintf(stderr, "Issues found:\n");
+            sudoku_print_errors(sudoku, 0);
         }
         else {
-            sudoku_print(stderr, sudoku);
-            if (sudoku_is_correct(sudoku, 0)) {
-                fprintf(stderr, "Puzzle is correct\n");
-            }
-            else {
-                fprintf(stderr, "Puzzle is not correct:\n");
-                sudoku_print_errors(sudoku, 0);
-            }
+             fprintf(stderr, "No issues found\n");
         }
     }
     return 0;

@@ -92,33 +92,29 @@ int sudoku_format_is_correct(Grid_T grid) {
 }
 
 
-/* sudoku_print: Writes a sudoku puzzle grid to stream.
+/* sudoku_print: Writes a sudoku puzzle grid to stdout.
 
 The format is 9 numbers per line and after each number there is a space char.
 After the last number in each line there is a LF char.
 
-Checks: if stream is NULL at runtime.
-
 Parameters:
-stream: stream to write to.
 grid: a Grid_T type.
 
 Returns: void */
-void sudoku_print(FILE *stream, Grid_T grid) {
+void sudoku_print(Grid_T grid) {
     int i, j, val;
 
-    assert(stream);
     for (i = 0; i < SIZE; i++) {
         for (j = 0; j < SIZE; j++) {
             val = grid_read_value(grid, i, j);
             if (j == SIZE - 1) {
-                fprintf(stream, "%d", val);
+                fprintf(stdout, "%d", val);
             }
             else {
-                fprintf(stream, "%d ", val);
+                fprintf(stdout, "%d ", val);
             }
         }
-        fprintf(stream, "\n");
+        fprintf(stdout, "\n");
     }
     return;
 }
@@ -126,7 +122,7 @@ void sudoku_print(FILE *stream, Grid_T grid) {
 
 /* sudoku_errors_rules
 
-Writes to stderr the grid errors that appear in row or
+Writes to stdout the grid errors that appear in row or
 column or block number indicated by num. Only errors related to numbers
 appearing twice are considered.
 
@@ -182,25 +178,25 @@ static int sudoku_errors_rules(Grid_T grid, int show, int num, int type) {
                 return err;
             }
             if (type == 1) {        /* error in row */
-                fprintf(stderr, "In row %d, number %d appears in columns",
+                fprintf(stdout, "In row %d, number %d appears in columns",
                     num + 1, k);
             }   
             else if (type == 0) {   /* error in column */
-                fprintf(stderr, "In column %d, number %d appears in rows",
+                fprintf(stdout, "In column %d, number %d appears in rows",
                     num + 1, k);
             }
             else {                  /* error in block */
-                fprintf(stderr, "In block %d, number %d appears in cells",
+                fprintf(stdout, "In block %d, number %d appears in cells",
                     num + 1, k);
             }
 
             /* print all cells that have errors */
             for (i = 0; i < SIZE; i++) {
                 if (found[i]) {
-                    fprintf(stderr, " %d", i + 1);
+                    fprintf(stdout, " %d", i + 1);
                 }
             }
-            fprintf(stderr, "\n");
+            fprintf(stdout, "\n");
         }
     }
     return err;
@@ -209,7 +205,7 @@ static int sudoku_errors_rules(Grid_T grid, int show, int num, int type) {
 
 /* sudoku_errors_zero
 
-Writes to stderr only the grid errors related to empty cells.
+Writes to stdout only the grid errors related to empty cells.
 
 Parameters:
 grid: a Grid_T type.
@@ -240,16 +236,16 @@ static int sudoku_errors_zero(Grid_T grid, int show) {
                     continue;
                 }
                 if (!found) {
-                    fprintf(stderr, "Empty cells:");
+                    fprintf(stdout, "Empty cells:");
                     found = 1;
                 }
                 count_zero++;
-                fprintf(stderr, " (%d,%d)", row + 1, col + 1);
+                fprintf(stdout, " (%d,%d)", row + 1, col + 1);
             }
         }
     }
     if (found && show) {
-        fprintf(stderr, " [%d]\n", count_zero);
+        fprintf(stdout, " [%d]\n", count_zero);
     }
     found = 0;
     for (row = 0; row < SIZE; row++) {
@@ -264,16 +260,16 @@ static int sudoku_errors_zero(Grid_T grid, int show) {
                     continue;
                 }
                 if (!found) {
-                    fprintf(stderr, "Empty cells with no choices:");
+                    fprintf(stdout, "Empty cells with no choices:");
                     found = 1;
                 }
                 count_nochoice++;
-                fprintf(stderr, " (%d,%d)", row + 1, col + 1);
+                fprintf(stdout, " (%d,%d)", row + 1, col + 1);
             }
         }
     }
     if (found && show) {
-        fprintf(stderr, " [%d]\n", count_nochoice);
+        fprintf(stdout, " [%d]\n", count_nochoice);
     }
     return err;
 }
@@ -281,7 +277,7 @@ static int sudoku_errors_zero(Grid_T grid, int show) {
 
 /* sudoku_print_errors
 
-Writes to stderr all errors of grid including:
+Writes to stdout all errors of grid including:
     Errors related to numbers appearing twice in the same row/column/block.
     Errors related to empty cells.
 
