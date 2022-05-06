@@ -378,8 +378,8 @@ void grid_set_formatok(Grid_T *grid) {
 
 /* grid_clear_formatok
 
-Sets the formatok field of grid to 0, meaning the grid has at least one invalid 
-cell value.
+Sets the formatok field of grid to 0, meaning the grid does not match the
+required input format.
 
 Checks: if grid is NULL at runtime
 

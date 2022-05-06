@@ -81,7 +81,7 @@ Grid_T sudoku_read(void) {
 
 /* sudoku_format_is_correct
 
-Checks if the Grid_T returned by sudoku_read() has the correct format.
+Indicates whether grid has the correct format.
 
 Parameters:
 grid: a Grid_T type.

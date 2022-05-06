@@ -29,10 +29,16 @@ Fields:
 
 > initialized: 1 if the available choices for each cell have been computed
 and are up to date, 0 otherwise.
+
+> formatok: 1 if the puzzle meets the required input format, 0 otherwise.
+
 > val: value of cell i,j. Takes values from 0 to SIZE. A 0 value means that
     the cell is currently empty.
+
 > count: number of possible choices for cell i,j
+
 > num[CHOICES]: num[k] = 1 if k is valid choice for cell(i, j) else num[k] = 0
+
 > elts[SIZE][SIZE]: the actual grid
 */
 typedef struct grid_s {
@@ -349,8 +355,8 @@ void grid_set_formatok(Grid_T *grid);
 
 /* grid_clear_formatok
 
-Sets the formatok field of grid to 0, meaning the grid has at least one invalid 
-cell value.
+Sets the formatok field of grid to 0, meaning the grid does not match the
+required input format.
 
 Checks: if grid is NULL at runtime
 
