@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
             fprintf(stdout, "Puzzle has no solutions\n");
             return 0;
         }
-        if (sudoku_solution_is_unique(sudoku_solved)) {
+        if (sudoku_has_unique_choice_solution(sudoku_solved)) {
             fprintf(stdout, "Puzzle has one (unique choice) solution:\n");
         }
         else {
@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
     else if (argc == 3) {   /* argument -g <nelts> */
         nelts = atoi(argv[2]);
         sudoku = sudoku_generate(nelts);
-        if (sudoku_solution_is_unique(sudoku)) {
+        if (sudoku_has_unique_choice_solution(sudoku)) {
             fprintf(stderr, "Generating (unique choice) solvable puzzle...\n");
         }
         else {
