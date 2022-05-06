@@ -142,7 +142,10 @@ Returns: 1 if the arguments are valid, 0 otherwise. */
 int has_valid_arguments(int argc, char **argv) {
     int valid = 1;
 
-    if (argc == 3) {
+    if (argc > 3) {
+        valid = 0;
+    }
+    else if (argc == 3) {
         if (strcmp(argv[1], "-g")) {
             valid = 0;
         }
