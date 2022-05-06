@@ -11,41 +11,29 @@ int checkarg(int argc, char **argv);
 
 /* main
 
-Parameters:
-argc: number of command line arguments
-argv: the command line arguments
+Use:
 
-If run with 0 arguments:
-- Reads a puzzle from stdin.
-- Prints the puzzle to stderr.
-- Solves the puzzle.
-- Prints a message to stderr indicating if the puzzle has a unique choice
-solution, multiple choices solutions, or no solution.
-- If a solution exists, it prints it to stderr.
-- If a solutions does not exist, it prints one of the puzzles that
-have been examined and its errors.
+1) Read a sudoku form stdin and attempt to solve it:
+./sudoku-ui
 
-If run with argument '-c':
-- Reads a puzzle from stdin.
-- Prints the puzzle to stderr.
-- Checks if the puzzle is correct (fully completed and does not violate any 
-rules)
-- Prints a message to stderr indicating if the puzzle is correct or not.
-- If the puzzle is not correct, it prints its errors.
+2) Read a sudoku from input_file and attempt to solve it:
+./sudoku-ui < input_file
 
-If run with argument '-g <nelts>':
-- Generates a random puzzle with ~nelts (1 <= nelts <= 81) completed cells and
-prints it to stdout.
+3) Read a sudoku from input_file and check its correctness:
+./sudoku-ui -c < input_file
 
-If run with argument '-h':
-- Prints the help message to stderr.
+4) Read a sudoku from input_file and print it in a 9x9 grid:
+./sudoku-ui -s < input_file
 
-If run with argument '-s':
-- Reads a puzzle from stdin and prints it to stdout in the standard 9x9 grid
-shown in puzzle.h
+5) Generate a solvable sudoku with 40 non-zero numbers:
+./sudoku-ui -g 40
 
-Any combination of the above arguments will be rejected and the help message
-will be displayed. */
+6) Generate a solvable sudoku with 40 non-zero numbers and solve it:
+./sudoku-ui -g 40 | ./sudoku-ui
+
+7) Display the help:
+./sudoku-ui -h
+*/
 int main(int argc, char **argv) {
     Grid_T sudoku, sudoku_solved;
     int nelts;
