@@ -25,7 +25,7 @@ LF char right after the last digit. A '0' or '.' indicates an empty cell.
 
 Parameters: void
 
-Returns: a Grid_T type */
+Returns: a Grid_T type. Empty cells have a value of 0 */
 Grid_T sudoku_read(void);
 
 
@@ -90,10 +90,12 @@ int sudoku_is_correct(Grid_T grid, int rules_only);
 
 /* sudoku_solve
 
-Solves grid using recursion (backtracking method). If there is more than
-one solution, it returns one of them. If there is no solution, it returns one
-of the attempted solutions. If the puzzle violates a sudoku rule, it returns
-the initial puzzle.
+Solves grid using recursion (backtracking).
+
+- If there ae multiple solutions, it returns one of them.
+- If there is no solution, it returns a puzzle that is as close as possible
+to a solution.
+- If the puzzle violates a sudoku rule, it returns the initial puzzle.
 
 Parameters:
 grid: a Grid_T type
@@ -122,12 +124,13 @@ Generates a random sudoku with nelts non-zero cells.
 
 The following algorithm is used:
 1) Generate a random fully completed puzzle.
-2) Start clearing random cells and each time check whether the
-puzzle has a unique choice solution.
-3) If the puzzle does not have unique choice solution, try another cell.
-4) If no matter what cell is chosen, the puzzle cannot have a unique
-choice solution, continue clearing cells until the nelts non-zero
-cells requirement is met.
+2) Clear a random cell and check whether the puzzle has a unique choice
+solution.
+3) If yes, repeat previous step. Return when the nelts non-zero requirements
+is met.
+3) If no, pick another cell. If all cells have been tried and all of them
+lead to a non unique choice solution, continue clearing cells until the
+nelts non-zero cells requirement is met.
 
 We can find whether the returned puzzle has a unique choice solution by
 calling sudoku_solution_is_unique() before solving the puzzle.

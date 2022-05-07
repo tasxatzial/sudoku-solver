@@ -12,8 +12,8 @@ static Grid_T sudoku_generate_complete(void);
 static void sudoku_init_choices(Grid_T *grid);
 static int sudoku_try_next(Grid_T grid, int *row, int *col);
 static void sudoku_set_rules(Grid_T *grid);
-static int sudoku_errors_rules(Grid_T grid, int show, int num, int type);
-static int sudoku_errors_zero(Grid_T grid, int show);
+static int sudoku_errors_rules(Grid_T grid, int show, int index, int type);
+static int sudoku_errors_empty(Grid_T grid, int show);
 static void sudoku_add_choice(Grid_T *grid, int row, int col, int val);
 
 
@@ -35,7 +35,7 @@ LF char right after the last digit. A '0' or '.' indicates an empty cell.
 
 Parameters: void
 
-Returns: a Grid_T type  */
+Returns: a Grid_T type. Empty cells have a value of 0 */
 Grid_T sudoku_read(void) {
     int i, j, val;
     Grid_T sudoku;
@@ -122,45 +122,44 @@ void sudoku_print(Grid_T grid) {
 
 /* sudoku_errors_rules
 
-Writes to stdout the grid errors that appear in row or
-column or block number indicated by num. Only errors related to numbers
+Writes to stdout the grid errors that appear in the row or
+column or block indicated by index. Only errors related to numbers
 appearing twice are considered.
 
 Parameters:
 grid: a Grid_T type.
 show: 0 - error messages will not be printed and the function
-       will return when the first error is found.
+      will return when the first error is found.
       1 - all error messages will be printed.
-num: Indicates the number of row/col/block that will be checked for errors.
-takes values from 0 to SIZE-1.
+index: Indicates the index of row or column or block that will be checked
+       for errors.
 type: a value of 1 indicates a row, 0 indicates a column, 2 indicates a block.
 
 Returns: 1 if errors were found, 0 otherwise. */
-static int sudoku_errors_rules(Grid_T grid, int show, int num, int type) {
-    int i, k, val, found[SIZE], count, err, row, col;
+static int sudoku_errors_rules(Grid_T grid, int show, int index, int type) {
+    int i, val, val_cell, found[SIZE], count, err, row, col;
 
     err = 0;
 
-    /* for each value from 1 to SIZE */
-    for (k = 1; k <= SIZE; k++) {
+    for (val = 1; val <= SIZE; val++) {
         count = 0; 
 
-        /* go through row or column or block */
+        /* scan the row/column/block i (each have SIZE cells) */
         for (i = 0; i < SIZE; i++) {
             if (type == 1) {            /* row */
-                val = grid_read_value(grid, num, i);
+                val_cell = grid_read_value(grid, index, i);
             }
             else if (type == 0) {       /* column */
-                val = grid_read_value(grid, i, num);
+                val_cell = grid_read_value(grid, i, index);
             }
             else {                      /* block */
-                row = i / BSIZE + (num / BSIZE) * BSIZE;
-                col = i % BSIZE + (num % BSIZE) * BSIZE;
-                val = grid_read_value(grid, row, col);
+                row = i / BSIZE + (index / BSIZE) * BSIZE;
+                col = i % BSIZE + (index % BSIZE) * BSIZE;
+                val_cell = grid_read_value(grid, row, col);
             }
 
-            /* value was found count number of times */
-            if (k == val) {     
+            /* cell value was found in the same row/column/block */
+            if (val == val_cell) {
                 found[i] = 1;
                 count++;
             }
@@ -169,28 +168,26 @@ static int sudoku_errors_rules(Grid_T grid, int show, int num, int type) {
             }
         }
 
-        /* more than one time found => error */
+        /* more than one time found in the same row/column/block => error */
         if (count > 1) {        
             err = 1;
 
-            /* return if errors will not be printed */
+            /* return if we don't want errors to be printed */
             if (!show) {
                 return err;
             }
+
             if (type == 1) {        /* error in row */
-                fprintf(stdout, "In row %d, number %d appears in columns",
-                    num + 1, k);
+                fprintf(stdout, "In row %d, number %d appears in columns", index + 1, val);
             }   
             else if (type == 0) {   /* error in column */
-                fprintf(stdout, "In column %d, number %d appears in rows",
-                    num + 1, k);
+                fprintf(stdout, "In column %d, number %d appears in rows", index + 1, val);
             }
             else {                  /* error in block */
-                fprintf(stdout, "In block %d, number %d appears in cells",
-                    num + 1, k);
+                fprintf(stdout, "In block %d, number %d appears in cells", index + 1, val);
             }
 
-            /* print all cells that have errors */
+            /* print all cells in the same row/col/block that have errors */
             for (i = 0; i < SIZE; i++) {
                 if (found[i]) {
                     fprintf(stdout, " %d", i + 1);
@@ -203,7 +200,7 @@ static int sudoku_errors_rules(Grid_T grid, int show, int num, int type) {
 }
 
 
-/* sudoku_errors_zero
+/* sudoku_errors_empty
 
 Writes to stdout only the grid errors related to empty cells.
 
@@ -214,19 +211,20 @@ show: 0 - error messages will not be printed and the function
       1 - all error messages will be printed.
 
 Returns: 1 if errors were found, 0 otherwise. */
-static int sudoku_errors_zero(Grid_T grid, int show) {
-    int row, col, val, err, found, count_zero, count_nochoice;
+static int sudoku_errors_empty(Grid_T grid, int show) {
+    int row, col, val, err, first_print, empty, empty_nochoice;
 
-    err = found = count_zero = count_nochoice = 0;
+    err = first_print = empty = empty_nochoice = 0;
+
     for (row = 0; row < SIZE; row++) {
         for (col = 0; col < SIZE; col++) {
             val = grid_read_value(grid, row, col);
 
-            /* only empty cells are considered */
+            /* it's an error if cell is empty */
             if (!val) {
                 err = 1;
 
-                /* return if errors will not be printed */
+                /* return if we don't want errors to be printed */
                 if (!show) {
                     return err;
                 }
@@ -235,19 +233,25 @@ static int sudoku_errors_zero(Grid_T grid, int show) {
                 if (!grid_read_count(grid, row, col)) {
                     continue;
                 }
-                if (!found) {
+
+                /* print only the first time an error is found */
+                if (!first_print) {
                     fprintf(stdout, "Empty cells:");
-                    found = 1;
+                    first_print = 1;
                 }
-                count_zero++;
+                empty++;
                 fprintf(stdout, " (%d,%d)", row + 1, col + 1);
             }
         }
     }
-    if (found && show) {
-        fprintf(stdout, " [%d]\n", count_zero);
+
+    /* print total number of empty cells that have at least one choice left */
+    if (first_print && show) {
+        fprintf(stdout, " [%d]\n", empty);
     }
-    found = 0;
+
+    /* repeat the above process but check only empty cells with no choices */
+    first_print = 0;
     for (row = 0; row < SIZE; row++) {
         for (col = 0; col < SIZE; col++) {
             val = grid_read_value(grid, row, col);
@@ -255,22 +259,28 @@ static int sudoku_errors_zero(Grid_T grid, int show) {
             /* only empty cells are considered */
             if (!val) {
 
-                /* skip empty cells that have choices left */
+                /* skip empty cells that have at least one choice left */
                 if (grid_read_count(grid, row, col)) {
                     continue;
                 }
-                if (!found) {
+
+                /* print only the first time an error is found */
+                if (!first_print) {
                     fprintf(stdout, "Empty cells with no choices:");
-                    found = 1;
+                    first_print = 1;
                 }
-                count_nochoice++;
+
+                empty_nochoice++;
                 fprintf(stdout, " (%d,%d)", row + 1, col + 1);
             }
         }
     }
-    if (found && show) {
-        fprintf(stdout, " [%d]\n", count_nochoice);
+
+    /* print total number of empty cells that have no choices left */
+    if (first_print && show) {
+        fprintf(stdout, " [%d]\n", empty_nochoice);
     }
+
     return err;
 }
 
@@ -291,21 +301,21 @@ also include empty cells.
 
 Returns: void */
 void sudoku_print_errors(Grid_T grid, int rules_only) {
-    int k;
+    int i;
 
     /* Show errors related to numbers appearing twice in the same column */
-    for (k = 0; k < SIZE; k++) {
-        sudoku_errors_rules(grid, 1, k, 0);
+    for (i = 0; i < SIZE; i++) {
+        sudoku_errors_rules(grid, 1, i, 0);
     }
 
     /* Show errors related to numbers appearing twice in the same row */
-    for (k = 0; k < SIZE; k++) {
-        sudoku_errors_rules(grid, 1, k, 1);
+    for (i = 0; i < SIZE; i++) {
+        sudoku_errors_rules(grid, 1, i, 1);
     }
 
     /* Show errors related to numbers appearing twice in the same block */
-    for (k = 0; k < SIZE; k++) {
-        sudoku_errors_rules(grid, 1, k, 2);
+    for (i = 0; i < SIZE; i++) {
+        sudoku_errors_rules(grid, 1, i, 2);
     }
 
     /* Calculate available choices for each cell */
@@ -315,7 +325,7 @@ void sudoku_print_errors(Grid_T grid, int rules_only) {
 
     /* Show errors related to empty cells */
     if (!rules_only) {
-        sudoku_errors_zero(grid, 1);
+        sudoku_errors_empty(grid, 1);
     }
     return;
 }
@@ -353,7 +363,7 @@ int sudoku_is_correct(Grid_T grid, int rules_only) {
     }
 
     /* Find errors related to empty cells */
-    if (!rules_only && sudoku_errors_zero(grid, 0)) {
+    if (!rules_only && sudoku_errors_empty(grid, 0)) {
         return 0;
     }
     return 1;
@@ -372,7 +382,7 @@ grid: a pointer to a Grid_T type.
 
 Returns: void */
 static void sudoku_init_choices(Grid_T *grid) {
-    int row, col, k, val, bh, bv;
+    int i, choice, val, row, col, brow, bcol;
 
     assert(grid);
     for (row = 0; row < SIZE; row++) {
@@ -380,33 +390,35 @@ static void sudoku_init_choices(Grid_T *grid) {
             val = grid_read_value(*grid, row, col);
             grid_clear_choice(grid, row, col, 0);
 
-            /* for non-empty cells, set count to 0 and clear all choices */
+            /* for filled in cells set count to 0 and clear all choices */
             if (val) {
                 grid_clear_count(grid, row, col);
-                for (k = 1; k <= SIZE; k++) {
-                    grid_clear_choice(grid, row, col, k);
+                for (choice = 1; choice <= SIZE; choice++) {
+                    grid_clear_choice(grid, row, col, choice);
                 }
                 continue;
             }
 
-            /* for empty cells set count to SIZE and enable all choices-{0} */
+            /* else set count to SIZE and enable all choices-{0} */
             grid_set_count(grid, row, col);
-            for (k = 1; k <= SIZE; k++) {
-                grid_set_choice(grid, row, col, k);
+            for (choice = 1; choice <= SIZE; choice++) {
+                grid_set_choice(grid, row, col, choice);
             }
 
-            /* remove rows, columns values from (row, col) */
-            for (k = 0; k < SIZE; k++) {
-                val = grid_read_value(*grid, row, k);
+            /* remove the value of (row, col) from the choices of all
+            cells that belong to the row & col that contains (row, col) */
+            for (i = 0; i < SIZE; i++) {
+                val = grid_read_value(*grid, row, i);
                 grid_remove_choice(grid, row, col, val);
-                val = grid_read_value(*grid, k, col);
+                val = grid_read_value(*grid, i, col);
                 grid_remove_choice(grid, row, col, val);
             }
 
-            /* remove block values from (row, col) */
-            for (bh = SUBB(row); bh < SUBB(row) + BSIZE; bh++) {
-                for (bv = SUBB(col); bv < SUBB(col) + BSIZE; bv++) {
-                    val = grid_read_value(*grid, bh, bv);
+            /* remove the value of (row, col) from the choices of all cells
+            that belong to the block that contains (row, col) */
+            for (brow = SUBB(row); brow < SUBB(row) + BSIZE; brow++) {
+                for (bcol = SUBB(col); bcol < SUBB(col) + BSIZE; bcol++) {
+                    val = grid_read_value(*grid, brow, bcol);
                     grid_remove_choice(grid, row, col, val);
                 }
             }
@@ -429,13 +441,13 @@ grid: a pointer to a Grid_T type.
 
 Returns: void */
 static void sudoku_set_rules(Grid_T *grid) {
-    int k;
+    int i;
 
     assert(grid);
-    for (k = 0; k < SIZE; k++) {
-        if (sudoku_errors_rules(*grid, 0, k, 0) ||        /* column conflict */
-                sudoku_errors_rules(*grid, 0, k, 1) ||    /* row conflict */
-                sudoku_errors_rules(*grid, 0, k, 2)) {    /* block conflict */
+    for (i = 0; i < SIZE; i++) {
+        if (sudoku_errors_rules(*grid, 0, i, 0) ||        /* column conflict */
+                sudoku_errors_rules(*grid, 0, i, 1) ||    /* row conflict */
+                sudoku_errors_rules(*grid, 0, i, 2)) {    /* block conflict */
             grid_clear_rulesok(grid);
             return;
         }
@@ -447,9 +459,8 @@ static void sudoku_set_rules(Grid_T *grid) {
 
 /* sudoku_try_next
 
-Finds a grid cell that has the minimum number of available choices and sets
-the content of row, col pointers equal to the row, col of the cell.
-If such cell does not exist, the content or row, col pointers is set to -1.
+Finds a grid cell that has the minimum number of available choices among all
+cells.
 
 Checks: if row and col are NULL at runtime.
 
@@ -458,49 +469,50 @@ grid: a Grid_T type.
 row: pointer to a row number.
 col: pointer to a column number.
 
-Returns: One of the available choices if there is a cell with a min number of
-available choices, 0 otherwise */
+Returns: *row and *col are set to the row, col of the cell that has the
+minimum number of choices among all cells. Returns one of its available
+choices (1 to 9). Returns 0 if such cell does not exist */
 static int sudoku_try_next(Grid_T grid, int *row, int *col) {
-    int rowi, colj, val, count, count_min, num_scanned, non_empty;
+    int rowi, colj, val, choices, min_choices, scanned_cells, filled_cells;
 
     assert(row);
     assert(col);
     *row = -1;
     *col = -1;
-    num_scanned = 0;
-    non_empty = 0;
-    count_min = CHOICES;
+    scanned_cells = 0;
+    filled_cells = 0;
+    min_choices = CHOICES;
 
     /* Pick a random cell (rowi, colj) and scan grid horizontally starting
-    from (rowi, colj) */
+    from that cell */
     rowi = rand() % SIZE;
     colj = rand() % SIZE;
-    while (num_scanned != SIZE*SIZE) {
-        while (colj != SIZE && num_scanned != SIZE*SIZE) {
+    while (scanned_cells != SIZE*SIZE) {
+        while (colj != SIZE && scanned_cells != SIZE*SIZE) {
             val = grid_read_value(grid, rowi, colj);
 
-            /* skip non empty cells */
+            /* skip filled in cells */
             if (val) {
-                non_empty++;
+                filled_cells++;
                 colj++;
-                num_scanned++;
+                scanned_cells++;
                 continue;
             }
 
             /* puzzle is invalid if there is a cell with 0 choices */
-            count = grid_read_count(grid, rowi, colj);
-            if (count == 0) {
+            choices = grid_read_count(grid, rowi, colj);
+            if (choices == 0) {
                 return 0;
             }
 
             /* update min number of choices */
-            if (count < count_min) {
+            if (choices < min_choices) {
                 *row = rowi;
                 *col = colj;
-                count_min = count;
+                min_choices = choices;
             }
             colj++;
-            num_scanned++;
+            scanned_cells++;
         }
         rowi++;
         if (rowi == SIZE) {
@@ -510,12 +522,12 @@ static int sudoku_try_next(Grid_T grid, int *row, int *col) {
     }
 
     /* there is no cell with a minimum number of choices if all cells are
-    non empty */
-    if (non_empty == SIZE*SIZE) {
+    filled in */
+    if (filled_cells == SIZE*SIZE) {
         return 0;
     }
 
-    /* we have a cell selected, return one of its available choices */
+    /* we have now selected a cell, return one of its available choices */
     val = rand() % SIZE + 1;
     while (1) {
         if (grid_choice_is_valid(grid, *row, *col, val)) {
@@ -532,7 +544,7 @@ static int sudoku_try_next(Grid_T grid, int *row, int *col) {
 
 /* sudoku_add_choice
 
-Sets val as the value of grid cell (row, col) and removes val from the
+Sets val as the value of (row, col) and removes val from the
 available choices of every cell in the same row, column, block.
 
 Checks: if grid is NULL at runtime.
@@ -544,27 +556,28 @@ col: column number of val
 
 Returns: void */
 static void sudoku_add_choice(Grid_T *grid, int row, int col, int val) {
-    int k, bh, bv;
+    int i, choice, brow, bcol;
     
     assert(grid);
     grid_update_value(grid, row, col, val);
 
     /* set the number of choices to 0 and clear all choices */
     grid_clear_count(grid, row, col);
-    for (k = 1; k <= SIZE; k++) {
-        grid_clear_choice(grid, row, col, k);
+    for (choice = 1; choice <= SIZE; choice++) {
+        grid_clear_choice(grid, row, col, choice);
     }
 
-    /* remove the value as a choice of the same row/column */
-    for (k = 0; k < SIZE; k++) {
-        grid_remove_choice(grid, row, k, val);
-        grid_remove_choice(grid, k, col, val);
+    /* remove val as a choice from all cells in the same row, col */
+    for (i = 0; i < SIZE; i++) {
+        grid_remove_choice(grid, row, i, val);
+        grid_remove_choice(grid, i, col, val);
     }
 
-    /* remove the value as a choice of the same block */
-    for (bh = SUBB(row); bh < SUBB(row) + BSIZE; bh++) {
-        for (bv = SUBB(col); bv < SUBB(col) + BSIZE; bv++) {
-            grid_remove_choice(grid, bh, bv, val);
+    /* remove val as a choice from all cells that belong to the block
+    that contains (row, col) */
+    for (brow = SUBB(row); brow < SUBB(row) + BSIZE; brow++) {
+        for (bcol = SUBB(col); bcol < SUBB(col) + BSIZE; bcol++) {
+            grid_remove_choice(grid, brow, bcol, val);
         }
     }
     return;
@@ -579,7 +592,7 @@ Parameters: void
 
 Returns: a Grid_T struct */
 static Grid_T sudoku_generate_complete(void) {
-    int k, row, col, val, tries;
+    int choice, row, col, val, tries;
     Grid_T sudoku;
 
     grid_set_unique(&sudoku);
@@ -587,8 +600,8 @@ static Grid_T sudoku_generate_complete(void) {
     grid_clear_initialized(&sudoku);
     grid_set_formatok(&sudoku);
     
-    /* try to generate a full puzzle 10 times */
-    for (tries = 0; tries < 10; tries++) {
+    /* try to generate a full puzzle 20 times */
+    for (tries = 0; tries < 20; tries++) {
 
         /* start with an empty puzzle and initialize cell choices */
         for (row = 0; row < SIZE; row++) {
@@ -596,8 +609,8 @@ static Grid_T sudoku_generate_complete(void) {
                 grid_update_value(&sudoku, row, col, 0);
                 grid_set_count(&sudoku, row, col);
                 grid_clear_choice(&sudoku, row, col, 0);
-                for (k = 1; k <= SIZE; k++) {
-                    grid_set_choice(&sudoku, row, col, k);
+                for (choice = 1; choice <= SIZE; choice++) {
+                    grid_set_choice(&sudoku, row, col, choice);
                 }
             }
         }
@@ -608,14 +621,12 @@ static Grid_T sudoku_generate_complete(void) {
             sudoku_add_choice(&sudoku, row, col, val);
         }
 
-        /* puzzle is correct if it is fully completed */
         if (sudoku_is_correct(sudoku, 0)) {
             return sudoku;
         }
     }
 
-    /* if failed to generate a full puzzle, return the one below.
-    This puzzle however is trivial and shouldn't be returned */
+    /* if failed 20 times to generate a puzzle, return the one below */
     for (row = 0; row < SIZE; row++) {
         for (col = 0; col < SIZE; col++) {
             val = (col + row * BSIZE + row / BSIZE) % SIZE + 1;
@@ -632,12 +643,13 @@ Generates a random sudoku with nelts non-zero cells.
 
 The following algorithm is used:
 1) Generate a random fully completed puzzle.
-2) Start clearing random cells and each time check whether the
-puzzle has a unique choice solution.
-3) If the puzzle does not have unique choice solution, try another cell.
-4) If no matter what cell is chosen, the puzzle cannot have a unique
-choice solution, continue clearing cells until the nelts non-zero
-cells requirement is met.
+2) Clear a random cell and check whether the puzzle has a unique choice
+solution.
+3) If yes, repeat previous step. Return when the nelts non-zero requirements
+is met.
+3) If no, pick another cell. If all cells have been tried and all of them
+lead to a non unique choice solution, continue clearing cells until the
+nelts non-zero cells requirement is met.
 
 We can find whether the returned puzzle has a unique choice solution by
 calling sudoku_solution_is_unique() before solving the puzzle.
@@ -647,94 +659,91 @@ nelts: number of non-zero cells.
 
 Returns: a Grid_T type */
 Grid_T sudoku_generate(int nelts) {
-    int count, row, col, val , found, unique;
-    Grid_T sudoku, gtmp, solved;
-
-    /* tried(i,j) = 1 iff deleting cell (i, j) did not lead to a unique
-    choice solvable puzzle  */
+    int to_remove, row, col, val, has_nontried, unique_choice;
     int tried[SIZE][SIZE];
+    Grid_T sudoku, sudoku_copy, sudoku_solved;
 
     assert(nelts >= 0 && nelts <= SIZE * SIZE);
-    count = SIZE * SIZE - nelts;
-    found = 0;
-    unique = 1;
+    to_remove = SIZE * SIZE - nelts;
+    has_nontried = 0;
+    unique_choice = 1;
 
+    /* Initialize tried to 0. Set tried(i,j) to 1 if clearing cell (i, j)
+    did not lead to a unique choice solution.  */
     for (row = 0; row < SIZE; row++) {
         for (col = 0; col < SIZE; col++) {
             tried[row][col] = 0;
         }
     }
 
-    /* generate a random fully completed puzzle */
+    /* generate a random solved puzzle */
     sudoku = sudoku_generate_complete();
 
-    while (count > 0) {
+    while (to_remove > 0) {
 
-        /* pick a random non-empty cell (row, col) and attemp to clear it */
+        /* pick cell (row, col) and proceed only if it still has a value */
         row = rand() % SIZE;
         col = rand() % SIZE;
         if (!grid_read_value(sudoku, row, col)) {
             continue;
         }
 
-        /* if puzzle still has a unique choice solution */
-        if (unique) {
+        /* if puzzle cannot have a unique choice solution we only need to
+        clear the cell value and pick another cell */
+        if (!unique_choice) {
+            to_remove--;
+            grid_update_value(&sudoku, row, col, 0);
+            continue;
+        }
 
-            /* pick a different cell if this one has been tried */
-            if (tried[row][col]) {   
-                continue;
-            }
+        /* if puzzle still has a unique choice solution, we need to
+        pick a different cell if this one has been tried */
+        if (tried[row][col]) {
+            continue;
+        }
 
-            /* initialize a copy of the puzzle and set the cell to 0 */
-            gtmp = sudoku;
-            grid_update_value(&gtmp, row, col, 0);
-            sudoku_init_choices(&gtmp);
+        /* initialize a copy of puzzle and clear the cell value on the copy */
+        sudoku_copy = sudoku;
+        grid_update_value(&sudoku_copy, row, col, 0);
+        sudoku_init_choices(&sudoku_copy);
 
-            /* solve the puzzle and if there is a unique choice solution,
-            keep the copy of the puzzle, decrease count and set all cells
-            to not tried */
-            solved = sudoku_solve(gtmp);
-            if (grid_read_unique(solved)) {
-                count--;
-                sudoku = gtmp;
-                for (row = 0; row < SIZE; row++) {
-                    for (col = 0; col < SIZE; col++) {
-                        tried[row][col] = 0;
-                    }
-                }
-                continue;
-            }
-
-            /* else if there was not a unique choice solution, set the cell to
-            tried */
-            tried[row][col] = 1;
-
-            /* and search for a new non-tried cell */
-            found = 0;
+        /* solve the copy and if there is a unique choice solution,
+        we'll be using the copy from now on */
+        sudoku_solved = sudoku_solve(sudoku_copy);
+        if (grid_read_unique(sudoku_solved)) {
+            to_remove--;
+            sudoku = sudoku_copy;
             for (row = 0; row < SIZE; row++) {
                 for (col = 0; col < SIZE; col++) {
-                    val = grid_read_value(sudoku, row, col);
-                    if (val && !tried[row][col]) {
-                        found = 1;
-                    }
+                    tried[row][col] = 0;
                 }
             }
+            continue;
+        }
 
-            /* if such cell cannot be found, setting any cell to 0 will
-            produce a puzzle that will not have unique choice solution */ 
-            if (!found) {
-                unique = 0;
+        /* if solving the copy did not lead to unique choice solution,
+        set the cell to tried */
+        tried[row][col] = 1;
+
+        /* and search for a new non-tried cell */
+        has_nontried = 0;
+        for (row = 0; row < SIZE; row++) {
+            for (col = 0; col < SIZE; col++) {
+                val = grid_read_value(sudoku, row, col);
+                if (val && !tried[row][col]) {
+                    has_nontried = 1;
+                }
             }
         }
 
-        /* if puzzle cannot have a unique choice solution, just set the
-        cell to 0 and decrease count */
-        else {
-            count--;
-            grid_update_value(&sudoku, row, col, 0);
+        /* if a non-tried cell cannot be found, clearing a cell
+        creates a puzzle that will not have unique choice solution */
+        if (!has_nontried) {
+            unique_choice = 0;
         }
     }
-    if (!unique) {
+
+    if (!unique_choice) {
         grid_clear_unique(&sudoku);
     }
     return sudoku;
@@ -743,10 +752,12 @@ Grid_T sudoku_generate(int nelts) {
 
 /* sudoku_solve
 
-Solves grid using recursion (backtracking method). If there is more than
-one solution, it returns one of them. If there is no solution, it returns one
-of the attempted solutions. If the puzzle violates a sudoku rule, it returns
-the initial puzzle.
+Solves grid using recursion (backtracking).
+
+- If there ae multiple solutions, it returns one of them.
+- If there is no solution, it returns a puzzle that is as close as possible
+to a solution.
+- If the puzzle violates a sudoku rule, it returns the initial puzzle.
 
 Parameters:
 grid: a Grid_T type
@@ -754,26 +765,26 @@ grid: a Grid_T type
 Returns: a Grid_T type */
 Grid_T sudoku_solve(Grid_T grid) {
     int row, col, val;
-    Grid_T gtmp;
+    Grid_T grid_copy;
 
-    /* find if puzzle violates any rule */
+    /* if puzzle violates any rule */
     if (grid_read_rulesok(grid) == -1) {
         sudoku_set_rules(&grid);
     }
 
-    /* return if grid violates sudoku rules */
+    /* if grid violates sudoku rules */
     if (!grid_read_rulesok(grid)) {
         grid_clear_unique(&grid);
         return grid;
     }
 
-    /* initialize choices once */
+    /* initialize cell choices once */
     if (!grid_is_initialized(grid)) {
         sudoku_init_choices(&grid);
         grid_set_initialized(&grid);
     }
 
-    /* find a cell with min number of choices  */
+    /* find a cell with min number of choices among all cells */
     while ((val = sudoku_try_next(grid, &row, &col))) {
 
         /* if there is a cell that has only 1 choice, fill it */
@@ -784,13 +795,13 @@ Grid_T sudoku_solve(Grid_T grid) {
         /* else puzzle does not have a unique choice solution. solve a copy */
         else {
             grid_clear_unique(&grid);
-            gtmp = grid;
-            sudoku_add_choice(&gtmp, row, col, val);
-            gtmp = sudoku_solve(gtmp);
+            grid_copy = grid;
+            sudoku_add_choice(&grid_copy, row, col, val);
+            grid_copy = sudoku_solve(grid_copy);
 
             /* return the copy if solution is correct */
-            if (sudoku_is_correct(gtmp, 0)) {
-                return gtmp;
+            if (sudoku_is_correct(grid_copy, 0)) {
+                return grid_copy;
             }
 
             /* else remove the choice from the cell of the original puzzle */
@@ -800,7 +811,7 @@ Grid_T sudoku_solve(Grid_T grid) {
         }
     }
 
-    /* clear unique if puzzle not correct */
+    /* clear unique flag if puzzle not correct */
     if (grid_read_unique(grid) && !sudoku_is_correct(grid, 0)) {
         grid_clear_unique(&grid);
     }

@@ -252,7 +252,7 @@ void grid_reset_unique(Grid_T *grid);
 /* grid_set_rulesok
 
 Sets the rulesok field of grid to 1, meaning it does not violate any
-sudoku rule. Only rules related to numbers appearing twice should be considered.
+sudoku rule. Only rules related to numbers appearing twice are considered.
 
 Checks: if grid is NULL at runtime
 
@@ -266,7 +266,7 @@ void grid_set_rulesok(Grid_T *grid);
 /* grid_clear_rulesok
 
 Sets the rulesok field of grid to 0, meaning it violates at least one
-sudoku rule. Only rules related to numbers appearing twice should be considered.
+sudoku rule. Only rules related to numbers appearing twice are considered.
 
 Checks: if grid is NULL at runtime
 
@@ -280,7 +280,7 @@ void grid_clear_rulesok(Grid_T *grid);
 /* grid_reset_rulesok
 
 Sets the rulesok field of grid to -1, meaning it is not known if it violates
-any rules. Only rules related to numbers appearing twice should be considered.
+any rules. Only rules related to numbers appearing twice are considered.
 
 Checks: if grid is NULL at runtime
 
@@ -293,7 +293,8 @@ void grid_reset_rulesok(Grid_T *grid);
 
 /* grid_read_rulesok
 
-Reads the rulesok field of grid.
+Reads the rulesok field of grid. Only rules related to numbers appearing
+twice are considered.
 
 Parameters:
 grid: a Grid_T type
