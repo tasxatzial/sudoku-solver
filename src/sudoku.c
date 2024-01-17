@@ -214,9 +214,9 @@ show: 0 - error messages will not be printed and the function
 
 Returns: 1 if errors were found, 0 otherwise. */
 static int sudoku_errors_empty(Grid_T grid, int show) {
-    int row, col, val, err, first_print, empty, empty_nochoice;
+    int row, col, val, err, first_print;
 
-    err = first_print = empty = empty_nochoice = 0;
+    err = first_print = 0;
 
     for (row = 0; row < SIZE; row++) {
         for (col = 0; col < SIZE; col++) {
@@ -241,15 +241,12 @@ static int sudoku_errors_empty(Grid_T grid, int show) {
                     fprintf(stdout, "Empty cells:");
                     first_print = 1;
                 }
-                empty++;
                 fprintf(stdout, " (%d,%d)", row + 1, col + 1);
             }
         }
     }
-
-    /* print total number of empty cells that have at least one choice left */
     if (first_print && show) {
-        fprintf(stdout, " [%d]\n", empty);
+        fprintf(stdout, " \n");
     }
 
     /* repeat the above process but check only empty cells with no choices */
@@ -272,15 +269,12 @@ static int sudoku_errors_empty(Grid_T grid, int show) {
                     first_print = 1;
                 }
 
-                empty_nochoice++;
                 fprintf(stdout, " (%d,%d)", row + 1, col + 1);
             }
         }
     }
-
-    /* print total number of empty cells that have no choices left */
     if (first_print && show) {
-        fprintf(stdout, " [%d]\n", empty_nochoice);
+        fprintf(stdout, " \n");
     }
 
     return err;
