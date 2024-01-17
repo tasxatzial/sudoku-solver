@@ -10,22 +10,22 @@
 /* sudoku_read: Reads a sudoku puzzle from stdin.
 
 The input should have the format:
-. 0 3 4 5 6 7 8 9
-4 5 6 7 8 9 1 2 3
-7 8 9 1 2 3 4 5 6
-2 3 4 5 6 7 8 9 1
-5 6 7 8 9 1 2 3 4
-8 9 1 2 3 4 5 6 7
-3 4 5 6 7 8 9 1 2
-6 7 8 9 1 2 3 4 5
-9 1 2 3 4 5 6 7 8
+1 . . . . 7 . 9 .
+. 3 . . 2 . . . 8
+. . 9 6 . . 5 . .
+. . 5 3 . . 9 . .
+. 1 . . 8 . . . 2
+6 . . . . 4 . . .
+3 . . . . . . 1 .
+. 4 . . . . . . 7
+. . 7 . . . 3 . .
 
 Between each value there should be a space char. New lines are denoted by a
-LF char right after the last digit. A '0' or '.' indicates an empty cell.
+LF char. A dot char indicates an empty cell.
 
 Parameters: void
 
-Returns: a Grid_T type. Empty cells have a value of 0 */
+Returns: a Grid_T type. */
 Grid_T sudoku_read(void);
 
 
