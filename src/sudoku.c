@@ -556,12 +556,18 @@ val: the inserted value.
 
 Returns: void */
 void sudoku_insert_value(Grid_T *grid, int row, int col, int val) {
-    int i, choice, brow, bcol;
+    int i, index_val, choice, brow, bcol;
     
     assert(grid);
     assert(row >= 0 && row < SIZE);
     assert(col >= 0 && col < SIZE);
     assert(val >= 1 && val <= SIZE);
+
+    /* first we remove existing values at the given (row, col) */
+    index_val = grid_read_value(*grid, row, col);
+    if (index_val) {
+        sudoku_delete_value(grid, row, col);
+    }
 
     grid_update_value(grid, row, col, val);
 
@@ -582,6 +588,61 @@ void sudoku_insert_value(Grid_T *grid, int row, int col, int val) {
     for (brow = SUBB(row); brow < SUBB(row) + BSIZE; brow++) {
         for (bcol = SUBB(col); bcol < SUBB(col) + BSIZE; bcol++) {
             grid_remove_choice(grid, brow, bcol, val);
+        }
+    }
+    return;
+}
+
+
+/* sudoku_delete_value
+
+Deletes the value of the given sudoku at index (row, col).
+
+Checks: if grid is NULL.
+        if 0 <= row < 9.
+        if 0 <= col < 9.
+
+Parameters:
+grid: a pointer to a Grid_T type.
+row: row index.
+col: column index.
+
+Returns: void */
+void sudoku_delete_value(Grid_T *grid, int row, int col) {
+    int i, val, index_val, choice, brow, bcol;
+
+    assert(grid);
+    assert(row >= 0 && row < SIZE);
+    assert(col >= 0 && col < SIZE);
+
+    index_val = grid_read_value(*grid, row, col);
+    if (!index_val) {
+        return;
+    }
+
+    grid_update_value(grid, row, col, 0);
+    grid_clear_choice(grid, row, col, 0);
+
+    grid_set_count(grid, row, col);
+    for (choice = 1; choice <= SIZE; choice++) {
+        grid_set_choice(grid, row, col, choice);
+    }
+
+    /* remove the value of (row, col) from the choices of all
+    cells that belong to the row & col that contains (row, col) */
+    for (i = 0; i < SIZE; i++) {
+        val = grid_read_value(*grid, row, i);
+        grid_remove_choice(grid, row, col, val);
+        val = grid_read_value(*grid, i, col);
+        grid_remove_choice(grid, row, col, val);
+    }
+
+    /* remove the value of (row, col) from the choices of all cells
+    that belong to the block that contains (row, col) */
+    for (brow = SUBB(row); brow < SUBB(row) + BSIZE; brow++) {
+        for (bcol = SUBB(col); bcol < SUBB(col) + BSIZE; bcol++) {
+            val = grid_read_value(*grid, brow, bcol);
+            grid_remove_choice(grid, row, col, val);
         }
     }
     return;

@@ -163,4 +163,20 @@ Returns: void */
 void sudoku_insert_value(Grid_T *grid, int row, int col, int val);
 
 
+/* sudoku_delete_value
+
+Deletes the value of the given sudoku at index (row, col).
+
+Checks: if grid is NULL.
+        if 0 <= row < 9.
+        if 0 <= col < 9.
+
+Parameters:
+grid: a pointer to a Grid_T type.
+row: row index.
+col: column index.
+
+Returns: void */
+void sudoku_delete_value(Grid_T *grid, int row, int col);
+
 #endif
