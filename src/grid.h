@@ -7,7 +7,6 @@
 
 #define SIZE 9      /* grid size 9x9 */
 #define BSIZE 3     /* grid block size 3x3 */
-#define CHOICES 10  /* maximum number of choices for each cell (from 0 to 9)*/
 
 /* calculates the maximum multiple of BSIZE that is less than i */
 #define SUBB(i) (((i)/BSIZE) * BSIZE)
@@ -32,12 +31,12 @@ and are up to date, 0 otherwise.
 
 > formatok: 1 if the puzzle meets the required input format, 0 otherwise.
 
-> val: value of cell i,j. Takes values from 0 to SIZE. A 0 value means that
-    the cell is currently empty.
+> val: value of a cell. Takes values from 0 to SIZE. A zero value means that
+the cell is empty.
 
-> count: number of possible choices for cell i,j
+> count: number of possible choices for a cell.
 
-> num[CHOICES]: num[k] = 1 if k is valid choice for cell(i, j) else num[k] = 0
+> num[SIZE+1]: num[k] = 1 if k is valid choice for a cell, else num[k] = 0.
 
 > elts[SIZE][SIZE]: the actual grid
 */
@@ -50,7 +49,7 @@ typedef struct grid_s {
         int val;
         struct {
             int count;
-            int num[CHOICES];
+            int num[SIZE+1];
         } choices;
     } elts[SIZE][SIZE];
 } Grid_T;
