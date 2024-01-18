@@ -142,4 +142,21 @@ Returns: a Grid_T type */
 Grid_T sudoku_generate(int nelts);
 
 
+/* sudoku_insert_value
+
+Sets val as the value of (row, col) and removes val from the
+available choices of every cell in the same row, column, block.
+
+Checks: if grid is NULL at runtime.
+
+Parameters:
+grid: a pointer to a Grid_T type.
+row: row index of val.
+col: column index of val.
+val: the inserted value.
+
+Returns: void */
+void sudoku_insert_value(Grid_T *grid, int row, int col, int val);
+
+
 #endif

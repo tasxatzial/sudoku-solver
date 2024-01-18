@@ -14,7 +14,6 @@ static int sudoku_try_next(Grid_T grid, int *row, int *col);
 static void sudoku_set_rules(Grid_T *grid);
 static int sudoku_errors_rules(Grid_T grid, int show, int index, int type);
 static int sudoku_errors_empty(Grid_T grid, int show);
-static void sudoku_add_choice(Grid_T *grid, int row, int col, int val);
 
 
 /* sudoku_read: Reads a sudoku puzzle from stdin.
@@ -538,7 +537,7 @@ static int sudoku_try_next(Grid_T grid, int *row, int *col) {
 }
 
 
-/* sudoku_add_choice
+/* sudoku_insert_value
 
 Sets val as the value of (row, col) and removes val from the
 available choices of every cell in the same row, column, block.
@@ -547,11 +546,12 @@ Checks: if grid is NULL at runtime.
 
 Parameters:
 grid: a pointer to a Grid_T type.
-row: row number of val
-col: column number of val
+row: row index of val.
+col: column index of val.
+val: the inserted value.
 
 Returns: void */
-static void sudoku_add_choice(Grid_T *grid, int row, int col, int val) {
+void sudoku_insert_value(Grid_T *grid, int row, int col, int val) {
     int i, choice, brow, bcol;
     
     assert(grid);
@@ -614,7 +614,7 @@ static Grid_T sudoku_generate_complete(void) {
         /* fill random cells starting from the ones that have the min number
         of choices */
         while((val = sudoku_try_next(sudoku, &row, &col))) {
-            sudoku_add_choice(&sudoku, row, col, val);
+            sudoku_insert_value(&sudoku, row, col, val);
         }
 
         if (sudoku_is_correct(sudoku, 0)) {
@@ -785,14 +785,14 @@ Grid_T sudoku_solve(Grid_T grid) {
 
         /* if there is a cell that has only 1 choice, fill it */
         if (grid_read_count(grid, row, col) == 1) {
-            sudoku_add_choice(&grid, row, col, val);
+            sudoku_insert_value(&grid, row, col, val);
         }
 
         /* else puzzle does not have a unique choice solution. solve a copy */
         else {
             grid_clear_unique(&grid);
             grid_copy = grid;
-            sudoku_add_choice(&grid_copy, row, col, val);
+            sudoku_insert_value(&grid_copy, row, col, val);
             grid_copy = sudoku_solve(grid_copy);
 
             /* return the copy if solution is correct */
