@@ -7,7 +7,7 @@
 
 #define SIZE 9      /* grid size 9x9 */
 #define BSIZE 3     /* grid block size 3x3 */
-#define CHOICES 10  /* maximum number of available choices for each cell */
+#define CHOICES 10  /* maximum number of choices for each cell (from 0 to 9)*/
 
 /* calculates the maximum multiple of BSIZE that is less than i */
 #define SUBB(i) (((i)/BSIZE) * BSIZE)
@@ -60,14 +60,16 @@ typedef struct grid_s {
 
 Sets the value of grid cell (i, j) to n.
 
-Checks: if grid is NULL at runtime
-        if n is from 0 to SIZE
+Checks: if grid is NULL
+        if 0 <= i < SIZE
+        if 0 <= j < SIZE
+        if 0 <= n <= SIZE
 
 Parameters:
 grid: pointer to a Grid_T type
-i: row number from 0 to SIZE-1
-j: column number from 0 to SIZE-1
-n: value from 0 to SIZE
+i: row index
+j: column index
+n:
 
 Returns: void */
 void grid_update_value(Grid_T *grid, int i, int j, int n);
@@ -77,10 +79,13 @@ void grid_update_value(Grid_T *grid, int i, int j, int n);
 
 Reads the value of grid cell (i, j).
 
+Checks: if 0 <= i < SIZE
+        if 0 <= j < SIZE
+
 Parameters:
 grid: a Grid_T type
-i: row number from 0 to SIZE-1
-j: column number from 0 to SIZE-1
+i: row index
+j: column index
 
 Returns: a value from 0 to SIZE */
 int grid_read_value(Grid_T grid, int i, int j);
@@ -90,14 +95,16 @@ int grid_read_value(Grid_T grid, int i, int j);
 
 Enables choice n for grid cell (i, j).
 
-Checks: if grid is NULL at runtime
-        if n is from 0 to SIZE
+Checks: if grid is NULL
+        if 0 <= i < SIZE
+        if 0 <= j < SIZE
+        if 0 <= n <= SIZE
 
 Parameters:
 grid: pointer to a Grid_T type
-i: row number from 0 to SIZE-1
-j: column number from 0 to SIZE-1
-n: value from 0 to SIZE
+i: row index
+j: column index
+n:
 
 Returns: void */
 void grid_set_choice(Grid_T *grid, int i, int j, int n);
@@ -107,14 +114,16 @@ void grid_set_choice(Grid_T *grid, int i, int j, int n);
 
 Clears choice n for grid cell (i, j).
 
-Checks: if grid is NULL at runtime
-        if n is from 0 to SIZE
+Checks: if grid is NULL
+        if 0 <= i < SIZE
+        if 0 <= j < SIZE
+        if 0 <= n <= SIZE
 
 Parameters:
 grid: pointer to a Grid_T type
-i: row number from 0 to SIZE-1
-j: column number from 0 to SIZE-1
-n: value from 0 to SIZE
+i: row index
+j: column index
+n:
 
 Returns: void */
 void grid_clear_choice(Grid_T *grid, int i, int j, int n);
@@ -124,13 +133,15 @@ void grid_clear_choice(Grid_T *grid, int i, int j, int n);
 
 Finds if n is an available choice for grid cell (i, j).
 
-Checks: if n is from 0 to SIZE
+Checks: if 0 <= i < SIZE
+        if 0 <= j < SIZE
+        if 0 <= n <= SIZE
 
 Parameters:
 grid: a Grid_T type
-i: row number from 0 to SIZE-1
-j: column number from 0 to SIZE-1
-n: value from 0 to SIZE
+i: row index
+j: column index
+n:
 
 Returns: 1 or 0 indicating whether a choice is valid or not */
 int grid_choice_is_valid(Grid_T grid, int i, int j, int n);
@@ -141,14 +152,16 @@ int grid_choice_is_valid(Grid_T grid, int i, int j, int n);
 Removes choice n from grid cell (i, j) and adjusts its number of
 available remaining choices.
 
-Checks: if grid is NULL at runtime
-        if n is from 0 to SIZE
+Checks: if grid is NULL
+        if 0 <= i < SIZE
+        if 0 <= j < SIZE
+        if 0 <= n <= SIZE
 
 Parameters:
 grid: pointer to a Grid_T type
-i: row number from 0 to SIZE-1
-j: column number from 0 to SIZE-1
-n: value from 0 to SIZE
+i: row index
+j: column index
+n:
 
 Returns: void */
 void grid_remove_choice(Grid_T *grid, int i, int j, int n);
@@ -158,10 +171,13 @@ void grid_remove_choice(Grid_T *grid, int i, int j, int n);
 
 Reads the available choices for grid cell(i, j).
 
+Checks: if 0 <= i < SIZE
+        if 0 <= j < SIZE
+
 Parameters:
 grid: a Grid_T type
-i: row number from 0 to SIZE-1
-j: column number from 0 to SIZE-1
+i: row index
+j: column index
 
 Returns: the number of available choices for grid cell (i, j) */
 int grid_read_count(Grid_T grid, int i, int j);
@@ -171,12 +187,14 @@ int grid_read_count(Grid_T grid, int i, int j);
 
 Sets the number of available choices for grid cell (i, j) to SIZE.
 
-Checks: if grid is NULL at runtime
+Checks: if grid is NULL
+        if 0 <= i < SIZE
+        if 0 <= j < SIZE
 
 Parameters:
 grid: pointer to a Grid_T type
-i: row number from 0 to SIZE-1
-j: column number from 0 to SIZE-1
+i: row index
+j: column index
 
 Returns: void */
 void grid_set_count(Grid_T *grid, int i, int j);
@@ -186,12 +204,14 @@ void grid_set_count(Grid_T *grid, int i, int j);
 
 Sets the number of available choices for grid cell (i, j) to 0.
 
-Checks: if grid is NULL at runtime
+Checks: if grid is NULL
+        if 0 <= i < SIZE
+        if 0 <= j < SIZE
 
 Parameters:
 grid: pointer to a Grid_T type
-i: row number from 0 to SIZE-1
-j: column number from 0 to SIZE-1
+i: row index
+j: column index
 
 Returns: void */
 void grid_clear_count(Grid_T *grid, int i, int j);
@@ -212,7 +232,7 @@ int grid_read_unique(Grid_T grid);
 
 Sets the unique field of grid to 1, meaning it has a unique choice solution.
 
-Checks: if grid is NULL at runtime
+Checks: if grid is NULL
 
 Parameters:
 grid: pointer to a Grid_T type
@@ -226,7 +246,7 @@ void grid_set_unique(Grid_T *grid);
 Sets the unique field of grid to 0, meaning it does not have a unique choice
 solution.
 
-Checks: if grid is NULL at runtime
+Checks: if grid is NULL
 
 Parameters:
 grid: pointer to a Grid_T type
@@ -240,7 +260,7 @@ void grid_clear_unique(Grid_T *grid);
 Sets the unique field of grid to -1, meaning it is not known if it has a unique
 choice solution.
 
-Checks: if grid is NULL at runtime
+Checks: if grid is NULL
 
 Parameters:
 grid: pointer to a Grid_T type
@@ -254,7 +274,7 @@ void grid_reset_unique(Grid_T *grid);
 Sets the rulesok field of grid to 1, meaning it does not violate any
 sudoku rule. Only rules related to numbers appearing twice are considered.
 
-Checks: if grid is NULL at runtime
+Checks: if grid is NULL
 
 Parameters:
 grid: pointer to a Grid_T type
@@ -268,7 +288,7 @@ void grid_set_rulesok(Grid_T *grid);
 Sets the rulesok field of grid to 0, meaning it violates at least one
 sudoku rule. Only rules related to numbers appearing twice are considered.
 
-Checks: if grid is NULL at runtime
+Checks: if grid is NULL
 
 Parameters:
 grid: pointer to a Grid_T type
@@ -282,7 +302,7 @@ void grid_clear_rulesok(Grid_T *grid);
 Sets the rulesok field of grid to -1, meaning it is not known if it violates
 any rules. Only rules related to numbers appearing twice are considered.
 
-Checks: if grid is NULL at runtime
+Checks: if grid is NULL
 
 Parameters:
 grid: pointer to a Grid_T type
@@ -309,7 +329,7 @@ int grid_read_rulesok(Grid_T grid);
 Sets the initialized field of grid to 1, meaning the available choices for each
 cell have been computed and are up to date.
 
-Checks: if grid is NULL at runtime
+Checks: if grid is NULL
 
 Parameters:
 grid: pointer to a Grid_T type
@@ -323,7 +343,7 @@ void grid_set_initialized(Grid_T *grid);
 Sets the initialized field of grid to 0, meaning the available choices for each
 cell have not been computed or are not up to date.
 
-Checks: if grid is NULL at runtime
+Checks: if grid is NULL
 
 Parameters:
 grid: pointer to a Grid_T type
@@ -348,7 +368,7 @@ int grid_is_initialized(Grid_T grid);
 
 Sets the formatok field of grid to 1, meaning all grid cells have valid values.
 
-Checks: if grid is NULL at runtime
+Checks: if grid is NULL
 
 Returns: void */
 void grid_set_formatok(Grid_T *grid);
@@ -359,7 +379,7 @@ void grid_set_formatok(Grid_T *grid);
 Sets the formatok field of grid to 0, meaning the grid does not match the
 required input format.
 
-Checks: if grid is NULL at runtime
+Checks: if grid is NULL
 
 Returns: void */
 void grid_clear_formatok(Grid_T *grid);

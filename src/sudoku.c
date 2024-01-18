@@ -16,7 +16,7 @@ static int sudoku_errors_rules(Grid_T grid, int show, int index, int type);
 static int sudoku_errors_empty(Grid_T grid, int show);
 
 
-/* sudoku_read: Reads a sudoku puzzle from stdin.
+/* sudoku_read: Reads a sudoku from stdin.
 
 The input should have the format:
 1 . . . . 7 . 9 .
@@ -80,7 +80,7 @@ Grid_T sudoku_read(void) {
 
 /* sudoku_format_is_correct
 
-Indicates whether grid has the correct format.
+Indicates whether the given sudoku has the correct format.
 
 Parameters:
 grid: a Grid_T type.
@@ -123,7 +123,7 @@ void sudoku_print(Grid_T grid) {
 
 /* sudoku_errors_rules
 
-Writes to stdout the grid errors that appear in the row or
+Writes to stdout the sudoku errors that appear in the row or
 column or block indicated by index. Only errors related to numbers
 appearing twice are considered.
 
@@ -203,7 +203,7 @@ static int sudoku_errors_rules(Grid_T grid, int show, int index, int type) {
 
 /* sudoku_errors_empty
 
-Writes to stdout only the grid errors related to empty cells.
+Writes to stdout the grid errors related to empty cells.
 
 Parameters:
 grid: a Grid_T type.
@@ -282,12 +282,12 @@ static int sudoku_errors_empty(Grid_T grid, int show) {
 
 /* sudoku_print_errors
 
-Writes to stdout all errors of grid including:
+Writes to stdout all sudoku errors including:
     Errors related to numbers appearing twice in the same row/column/block.
     Errors related to empty cells.
 
-Note that the number of available choices for each cell have been computed
-when the function returns.
+Note that the function computes the number of available choices for each cell
+upon its return.
 
 Parameters:
 grid: a Grid_T type.
@@ -328,9 +328,9 @@ void sudoku_print_errors(Grid_T grid, int rules_only) {
 
 /* sudoku_is_correct
 
-Checks if grid is fully completed and does not violate any sudoku rule.
-Note that the number of available choices for each cell have been computed when
-the function returns.
+Checks if the given sudoku is fully completed and does not violate any rule.
+Note that the function computes the number of available choices for each cell
+upon its return.
 
 Parameters:
 grid: a Grid_T type.
@@ -367,10 +367,10 @@ int sudoku_is_correct(Grid_T grid, int rules_only) {
 
 /* sudoku_init_choices
 
-Calculates the available remaining choices for each
-cell of the grid and modifies its appropriate fields as required.
+Calculates the available remaining choices for each cell of the given sudoku
+and modifies its appropriate fields as required.
 
-Checks: if grid is NULL at runtime.
+Checks: if grid is NULL.
 
 Parameters:
 grid: a pointer to a Grid_T type.
@@ -425,11 +425,11 @@ static void sudoku_init_choices(Grid_T *grid) {
 
 /* sudoku_set_rules
 
-Modifies the rulesok field of the grid. It sets it to 1
+Modifies the rulesok field of the given sudoku. It sets it to 1
 if grid does not violate any sudoku rule and to 0 if it does violate a
 rule. Only rules related to numbers appearing twice are considered.
 
-Checks: if grid is NULL at runtime
+Checks: if grid is NULL.
 
 Parameters:
 grid: a pointer to a Grid_T type.
@@ -454,10 +454,10 @@ static void sudoku_set_rules(Grid_T *grid) {
 
 /* sudoku_try_next
 
-Finds a grid cell that has the minimum number of available choices among all
+Finds a sudoku cell that has the minimum number of available choices among all
 cells.
 
-Checks: if row and col are NULL at runtime.
+Checks: if row and col are NULL.
 
 Parameters:
 grid: a Grid_T type.
@@ -466,7 +466,7 @@ col: pointer to a column number.
 
 Returns: *row and *col are set to the row, col of the cell that has the
 minimum number of choices among all cells. Returns one of its available
-choices (1 to 9). Returns 0 if such cell does not exist */
+choices (1 to 9) or 0 if such cell does not exist */
 static int sudoku_try_next(Grid_T grid, int *row, int *col) {
     int rowi, colj, val, choices, min_choices, scanned_cells, filled_cells;
 
@@ -539,15 +539,19 @@ static int sudoku_try_next(Grid_T grid, int *row, int *col) {
 
 /* sudoku_insert_value
 
-Sets val as the value of (row, col) and removes val from the
-available choices of every cell in the same row, column, block.
+Sets val as the value of the given sudoku at index (row, col) and removes val
+from the available choices of every cell in the same row, column, and
+corresponding block.
 
-Checks: if grid is NULL at runtime.
+Checks: if grid is NULL.
+        if 0 <= row < 9.
+        if 0 <= col < 9.
+        if 1 <= val <= 9.
 
 Parameters:
 grid: a pointer to a Grid_T type.
-row: row index of val.
-col: column index of val.
+row: row index
+col: column index
 val: the inserted value.
 
 Returns: void */
@@ -555,6 +559,10 @@ void sudoku_insert_value(Grid_T *grid, int row, int col, int val) {
     int i, choice, brow, bcol;
     
     assert(grid);
+    assert(row >= 0 && row < SIZE);
+    assert(col >= 0 && col < SIZE);
+    assert(val >= 1 && val <= SIZE);
+
     grid_update_value(grid, row, col, val);
 
     /* set the number of choices to 0 and clear all choices */
@@ -748,12 +756,12 @@ Grid_T sudoku_generate(int nelts) {
 
 /* sudoku_solve
 
-Solves grid using recursion (backtracking).
+Solves the given sudoku using recursion (backtracking).
 
-- If there ae multiple solutions, it returns one of them.
+- If there are multiple solutions, it returns one of them.
 - If there is no solution, it returns a puzzle that is as close as possible
 to a solution.
-- If the puzzle violates a sudoku rule, it returns the initial puzzle.
+- If the puzzle violates a rule, it returns the initial puzzle.
 
 Parameters:
 grid: a Grid_T type
@@ -817,7 +825,7 @@ Grid_T sudoku_solve(Grid_T grid) {
 
 /* sudoku_has_unique_choice_solution
 
-Indicates whether grid has a unique choice solution.
+Indicates whether the given sudoku has a unique choice solution.
 
 Parameters:
 grid: a Grid_T type
