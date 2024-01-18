@@ -12,6 +12,8 @@ The following functions are provided:
 * sudoku_solve(puzzle): Solve puzzle
 * sudoku_generate(N): Generate puzzle that has N non empty cells
 * sudoku_has_unique_choice_solution(puzzle): Show whether puzzle has a unique choice solution
+* sudoku_insert_value(puzzle, row, col, val): Update given cell with value
+* sudoku_delete_value(puzzle, row, col): Delete value from given cell
 
 ## Implementation
 
