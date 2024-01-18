@@ -9,7 +9,11 @@
 
 /* sudoku_read: Reads a sudoku from stdin.
 
-The input should have the format:
+The accepted format is 9 numbers per line. After each number there is a space
+char. Empty cells are denoted by a dot char. After the last cell in each line
+there is a LF char.
+
+Example:
 1 . . . . 7 . 9 .
 . 3 . . 2 . . . 8
 . . 9 6 . . 5 . .
@@ -19,9 +23,6 @@ The input should have the format:
 3 . . . . . . 1 .
 . 4 . . . . . . 7
 . . 7 . . . 3 . .
-
-Between each value there should be a space char. New lines are denoted by a
-LF char. A dot char indicates an empty cell.
 
 Parameters: void
 
@@ -42,8 +43,9 @@ int sudoku_format_is_correct(Grid_T grid);
 
 /* sudoku_print: Writes a sudoku puzzle grid to stdout.
 
-The format is 9 numbers per line and after each number there is a space char.
-After the last number in each line there is a LF char.
+The format is 9 numbers per line. After each number there is a space char.
+Empty cells are denoted by a dot char. After the last cell in each line there
+is a LF char.
 
 Parameters:
 grid: a Grid_T type.
@@ -54,14 +56,14 @@ void sudoku_print(Grid_T grid);
 
 /* sudoku_print_errors
 
-Writes to stdout all errors of grid including:
+Writes to stdout all sudoku errors including:
     Errors related to numbers appearing twice in the same row/column/block.
     Errors related to empty cells.
 
 Parameters:
 grid: a Grid_T type.
-rules_only: Any value will print only the cells that violate rules, 0 will
-also show all empty cells.
+rules_only: Any non-zero value will print only the cells that violate rules,
+0 will also show all empty cells.
 
 Returns: void */
 void sudoku_print_errors(Grid_T grid, int rules_only);
@@ -77,9 +79,8 @@ rules_only: Any value will check only for rules violation, 0 will
 also show all empty cells.
 
 Returns:
-rules_only != 0: 1 if puzzle is fully completed and does not violate rules,
-                 0 otherwise.
-rules_only = 0: 1 if puzzle violates only rules, 0 otherwise. */
+rules_only != 0: 1 if puzzle does not violate rules, else 0.
+rules_only = 0: 1 if puzzle is completed and does not violate rules, else 0. */
 int sudoku_is_correct(Grid_T grid, int rules_only);
 
 
