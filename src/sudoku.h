@@ -58,13 +58,10 @@ Writes to stdout all errors of grid including:
     Errors related to numbers appearing twice in the same row/column/block.
     Errors related to empty cells.
 
-Note that the function computes the number of available choices for each cell
-upon its return.
-
 Parameters:
 grid: a Grid_T type.
 rules_only: Any value will print only the cells that violate rules, 0 will
-also include empty cells.
+also show all empty cells.
 
 Returns: void */
 void sudoku_print_errors(Grid_T grid, int rules_only);
@@ -73,13 +70,11 @@ void sudoku_print_errors(Grid_T grid, int rules_only);
 /* sudoku_is_correct
 
 Checks if the given sudoku is fully completed and does not violate any rule.
-Note that the function computes the number of available choices for each cell
-upon its return.
 
 Parameters:
 grid: a Grid_T type.
 rules_only: Any value will check only for rules violation, 0 will
-also include empty cells.
+also show all empty cells.
 
 Returns:
 rules_only != 0: 1 if puzzle is fully completed and does not violate rules,

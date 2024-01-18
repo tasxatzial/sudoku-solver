@@ -142,7 +142,6 @@ static int sudoku_errors_rules(Grid_T grid, int show, int index, int type) {
     int i, val, val_cell, found[SIZE], count, err, row, col;
 
     err = 0;
-
     for (val = 1; val <= SIZE; val++) {
         count = 0; 
 
@@ -217,7 +216,6 @@ static int sudoku_errors_empty(Grid_T grid, int show) {
     int row, col, val, err, first_print;
 
     err = first_print = 0;
-
     for (row = 0; row < SIZE; row++) {
         for (col = 0; col < SIZE; col++) {
             val = grid_read_value(grid, row, col);
@@ -231,44 +229,11 @@ static int sudoku_errors_empty(Grid_T grid, int show) {
                     return err;
                 }
 
-                /* skip empty cells that have 0 choices */
-                if (!grid_read_count(grid, row, col)) {
-                    continue;
-                }
-
                 /* print only the first time an error is found */
                 if (!first_print) {
                     fprintf(stdout, "Empty cells:");
                     first_print = 1;
                 }
-                fprintf(stdout, " (%d,%d)", row + 1, col + 1);
-            }
-        }
-    }
-    if (first_print && show) {
-        fprintf(stdout, " \n");
-    }
-
-    /* repeat the above process but check only empty cells with no choices */
-    first_print = 0;
-    for (row = 0; row < SIZE; row++) {
-        for (col = 0; col < SIZE; col++) {
-            val = grid_read_value(grid, row, col);
-
-            /* only empty cells are considered */
-            if (!val) {
-
-                /* skip empty cells that have at least one choice left */
-                if (grid_read_count(grid, row, col)) {
-                    continue;
-                }
-
-                /* print only the first time an error is found */
-                if (!first_print) {
-                    fprintf(stdout, "Empty cells with no choices:");
-                    first_print = 1;
-                }
-
                 fprintf(stdout, " (%d,%d)", row + 1, col + 1);
             }
         }
@@ -286,13 +251,10 @@ Writes to stdout all sudoku errors including:
     Errors related to numbers appearing twice in the same row/column/block.
     Errors related to empty cells.
 
-Note that the function computes the number of available choices for each cell
-upon its return.
-
 Parameters:
 grid: a Grid_T type.
 rules_only: Any value will print only the cells that violate rules, 0 will
-also include empty cells.
+also show all empty cells.
 
 Returns: void */
 void sudoku_print_errors(Grid_T grid, int rules_only) {
@@ -313,11 +275,6 @@ void sudoku_print_errors(Grid_T grid, int rules_only) {
         sudoku_errors_rules(grid, 1, i, 2);
     }
 
-    /* Calculate available choices for each cell */
-    if (!grid_is_initialized(grid)) {
-        sudoku_init_choices(&grid);
-    }
-
     /* Show errors related to empty cells */
     if (!rules_only) {
         sudoku_errors_empty(grid, 1);
@@ -329,13 +286,11 @@ void sudoku_print_errors(Grid_T grid, int rules_only) {
 /* sudoku_is_correct
 
 Checks if the given sudoku is fully completed and does not violate any rule.
-Note that the function computes the number of available choices for each cell
-upon its return.
 
 Parameters:
 grid: a Grid_T type.
 rules_only: Any value will check only for rules violation, 0 will
-also include empty cells.
+also show all empty cells.
 
 Returns:
 rules_only != 0: 1 if puzzle is fully completed and does not violate rules,
@@ -343,7 +298,7 @@ rules_only != 0: 1 if puzzle is fully completed and does not violate rules,
 rules_only = 0: 1 if puzzle violates only rules, 0 otherwise. */
 int sudoku_is_correct(Grid_T grid, int rules_only) {
 
-    /* Find errors related to numbers appearing twice in the same 
+    /* Errors related to numbers appearing twice in the same 
     row/column/clock */
     if (grid_read_rulesok(grid) == -1) {
         sudoku_set_rules(&grid);
@@ -352,12 +307,7 @@ int sudoku_is_correct(Grid_T grid, int rules_only) {
         return 0;
     }
 
-    /* Calculate available choices for each cell */
-    if (!grid_is_initialized(grid)) {
-        sudoku_init_choices(&grid);
-    }
-
-    /* Find errors related to empty cells */
+    /* Errors related to empty cells */
     if (!rules_only && sudoku_errors_empty(grid, 0)) {
         return 0;
     }
@@ -466,7 +416,7 @@ static void sudoku_set_rules(Grid_T *grid) {
 
     assert(grid);
     for (i = 0; i < SIZE; i++) {
-        if (sudoku_errors_rules(*grid, 0, i, 0) ||        /* column conflict */
+        if (sudoku_errors_rules(*grid, 0, i, 0) ||    /* column conflict */
             sudoku_errors_rules(*grid, 0, i, 1) ||    /* row conflict */
             sudoku_errors_rules(*grid, 0, i, 2)) {    /* block conflict */
                 grid_clear_rulesok(grid);
