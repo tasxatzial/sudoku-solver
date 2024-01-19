@@ -42,7 +42,6 @@ int main(int argc, char **argv) {
         print_help(argv[0]);
         return 0;
     }
-
     srand(getpid());
     if (argc == 1) {        /* no arguments */
         sudoku = sudoku_read();

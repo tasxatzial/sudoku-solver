@@ -10,7 +10,7 @@ Uses lower level functions declared in grid.h */
 
 static Grid_T sudoku_generate_complete(void);
 static void sudoku_init_choices(Grid_T *grid);
-static void sudoku_init_choice(Grid_T *grid, int row, int col);
+static void sudoku_set_choice(Grid_T *grid, int row, int col, int val);
 static int sudoku_try_next(Grid_T grid, int *row, int *col);
 static void sudoku_set_rules(Grid_T *grid);
 static int sudoku_errors_rules(Grid_T grid, int show, int index, int type);
@@ -301,9 +301,7 @@ int sudoku_is_correct(Grid_T grid, int rules_only) {
 
     /* Errors related to numbers appearing twice in the same 
     row/column/clock */
-    if (grid_read_rulesok(grid) == -1) {
-        sudoku_set_rules(&grid);
-    }
+    sudoku_set_rules(&grid);
     if (!grid_read_rulesok(grid)) {
         return 0;
     }
@@ -328,72 +326,46 @@ grid: a pointer to a Grid_T type.
 
 Returns: void */
 static void sudoku_init_choices(Grid_T *grid) {
-    int row, col;
+    int i, val, choice, row, col, brow, bcol;
 
     assert(grid);
     for (row = 0; row < SIZE; row++) {
         for (col = 0; col < SIZE; col++) {
-            sudoku_init_choice(grid, row, col);
-        }
-    }
-    return;
-}
+            val = grid_read_value(*grid, row, col);
+            grid_clear_choice(grid, row, col, 0);
 
+            /* for filled-in cells set count to 0 and clear all choices */
+            if (val) {
+                grid_clear_count(grid, row, col);
+                for (choice = 1; choice <= SIZE; choice++) {
+                    grid_clear_choice(grid, row, col, choice);
+                }
+                continue;
+            }
 
-/* sudoku_init_choice
+            /* else set count to SIZE and enable all choices-{0} */
+            grid_set_count(grid, row, col);
+            for (choice = 1; choice <= SIZE; choice++) {
+                grid_set_choice(grid, row, col, choice);
+            }
 
-Calculates the available remaining choices of the given sudoku at index
-(row, col) and modifies its appropriate fields as required.
+            /* remove the value of (row, col) from the choices of all
+            cells that belong to the row & col that contains (row, col) */
+            for (i = 0; i < SIZE; i++) {
+                val = grid_read_value(*grid, row, i);
+                grid_remove_choice(grid, row, col, val);
+                val = grid_read_value(*grid, i, col);
+                grid_remove_choice(grid, row, col, val);
+            }
 
-Checks: if grid is NULL.
-        if 0 <= row < 9.
-        if 0 <= col < 9.
-
-Parameters:
-grid: a pointer to a Grid_T type.
-row: row index.
-col: column index.
-
-Returns: void */
-static void sudoku_init_choice(Grid_T *grid, int row, int col) {
-    int i, val, choice, brow, bcol;
-
-    assert(grid);
-    assert(row >= 0 && row < SIZE);
-    assert(col >= 0 && col < SIZE);
-    val = grid_read_value(*grid, row, col);
-    grid_clear_choice(grid, row, col, 0);
-
-    /* for filled-in cells set count to 0 and clear all choices */
-    if (val) {
-        grid_clear_count(grid, row, col);
-        for (choice = 1; choice <= SIZE; choice++) {
-            grid_clear_choice(grid, row, col, choice);
-        }
-        return;
-    }
-
-    /* else set count to SIZE and enable all choices-{0} */
-    grid_set_count(grid, row, col);
-    for (choice = 1; choice <= SIZE; choice++) {
-        grid_set_choice(grid, row, col, choice);
-    }
-
-    /* remove the value of (row, col) from the choices of all
-    cells that belong to the row & col that contains (row, col) */
-    for (i = 0; i < SIZE; i++) {
-        val = grid_read_value(*grid, row, i);
-        grid_remove_choice(grid, row, col, val);
-        val = grid_read_value(*grid, i, col);
-        grid_remove_choice(grid, row, col, val);
-    }
-
-    /* remove the value of (row, col) from the choices of all cells
-    that belong to the block that contains (row, col) */
-    for (brow = SUBB(row); brow < SUBB(row) + BSIZE; brow++) {
-        for (bcol = SUBB(col); bcol < SUBB(col) + BSIZE; bcol++) {
-            val = grid_read_value(*grid, brow, bcol);
-            grid_remove_choice(grid, row, col, val);
+            /* remove the value of (row, col) from the choices of all cells
+            that belong to the block that contains (row, col) */
+            for (brow = SUBB(row); brow < SUBB(row) + BSIZE; brow++) {
+                for (bcol = SUBB(col); bcol < SUBB(col) + BSIZE; bcol++) {
+                    val = grid_read_value(*grid, brow, bcol);
+                    grid_remove_choice(grid, row, col, val);
+                }
+            }
         }
     }
     return;
@@ -514,7 +486,7 @@ static int sudoku_try_next(Grid_T grid, int *row, int *col) {
 }
 
 
-/* sudoku_insert_value
+/* sudoku_set_choice
 
 Sets val as the value of the given sudoku at index (row, col) and removes val
 from the available choices of every cell in the same row, column, and
@@ -532,16 +504,13 @@ col: column index.
 val: the inserted value.
 
 Returns: void */
-void sudoku_insert_value(Grid_T *grid, int row, int col, int val) {
+static void sudoku_set_choice(Grid_T *grid, int row, int col, int val) {
     int i, choice, brow, bcol;
 
     assert(grid);
     assert(row >= 0 && row < SIZE);
     assert(col >= 0 && col < SIZE);
     assert(val >= 1 && val <= SIZE);
-    if (grid_read_value(*grid, row, col)) {
-        sudoku_delete_value(grid, row, col);
-    }
     grid_update_value(grid, row, col, val);
 
     /* set the number of choices to 0 and clear all choices */
@@ -567,6 +536,32 @@ void sudoku_insert_value(Grid_T *grid, int row, int col, int val) {
 }
 
 
+/* sudoku_insert_value
+
+Sets val as the value of the given sudoku at index (row, col).
+
+Checks: if grid is NULL.
+        if 0 <= row < 9.
+        if 0 <= col < 9.
+        if 1 <= val <= 9.
+
+Parameters:
+grid: a pointer to a Grid_T type.
+row: row index.
+col: column index.
+val: the inserted value.
+
+Returns: void */
+void sudoku_insert_value(Grid_T *grid, int row, int col, int val) {
+    assert(grid);
+    assert(row >= 0 && row < SIZE);
+    assert(col >= 0 && col < SIZE);
+    assert(val >= 1 && val <= SIZE);
+    grid_update_value(grid, row, col, val);
+    return;
+}
+
+
 /* sudoku_delete_value
 
 Deletes the value of the given sudoku at index (row, col).
@@ -585,10 +580,7 @@ void sudoku_delete_value(Grid_T *grid, int row, int col) {
     assert(grid);
     assert(row >= 0 && row < SIZE);
     assert(col >= 0 && col < SIZE);
-    if (grid_read_value(*grid, row, col)) {
-        grid_update_value(grid, row, col, 0);
-        sudoku_init_choice(grid, row, col);
-    }
+    grid_update_value(grid, row, col, 0);
     return;
 }
 
@@ -627,7 +619,7 @@ static Grid_T sudoku_generate_complete(void) {
         /* fill random cells starting from the ones that have the min number
         of choices */
         while((val = sudoku_try_next(sudoku, &row, &col))) {
-            sudoku_insert_value(&sudoku, row, col, val);
+            sudoku_set_choice(&sudoku, row, col, val);
         }
 
         if (sudoku_is_correct(sudoku, 0)) {
@@ -798,14 +790,14 @@ Grid_T sudoku_solve(Grid_T grid) {
 
         /* if there is a cell that has only 1 choice, fill it */
         if (grid_read_count(grid, row, col) == 1) {
-            sudoku_insert_value(&grid, row, col, val);
+            sudoku_set_choice(&grid, row, col, val);
         }
 
         /* else puzzle does not have a unique choice solution. solve a copy */
         else {
             grid_clear_unique(&grid);
             grid_copy = grid;
-            sudoku_insert_value(&grid_copy, row, col, val);
+            sudoku_set_choice(&grid_copy, row, col, val);
             grid_copy = sudoku_solve(grid_copy);
 
             /* return the copy if solution is correct */
