@@ -51,13 +51,13 @@ int main(int argc, char **argv) {
         }
         fprintf(stderr, "Input puzzle:\n");
         sudoku_print(sudoku);
-        if (!sudoku_is_correct(sudoku, 1)) {
+        if (!sudoku_is_correct(sudoku, 0)) {
             fprintf(stdout, "Puzzle violates rules:\n");
-            sudoku_print_errors(sudoku, 1);
+            sudoku_print_errors(sudoku, 0);
             return 0;
         }
         sudoku_solved = sudoku_solve(sudoku);
-        if (!sudoku_is_correct(sudoku_solved, 0)) {
+        if (!sudoku_is_correct(sudoku_solved, 1)) {
             fprintf(stdout, "Puzzle has no solutions\n");
             return 0;
         }
@@ -90,9 +90,9 @@ int main(int argc, char **argv) {
         if (!strcmp(argv[1], "-s")) { /* -s */
             return 0;
         }
-        if (!sudoku_is_correct(sudoku, 0)) {
+        if (!sudoku_is_correct(sudoku, 1)) {
             fprintf(stderr, "Issues found:\n");
-            sudoku_print_errors(sudoku, 0);
+            sudoku_print_errors(sudoku, 1);
         }
         else {
              fprintf(stderr, "No issues found\n");

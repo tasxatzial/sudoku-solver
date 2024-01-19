@@ -56,34 +56,33 @@ void sudoku_print(Grid_T grid);
 
 /* sudoku_print_errors
 
-Writes to stdout all sudoku errors including:
-    Errors related to numbers appearing twice in the same row/column/block.
-    Errors related to empty cells.
+Writes to stdout all sudoku errors. The additional parameter allow_empty
+controls whether we would want to consider empty cells as errors.
 
 Parameters:
 grid: a Grid_T type.
-rules_only: Any non-zero value will print only the cells that violate rules,
-0 will also show all empty cells.
+allow_empty: A value of zero will only show the standard rules violations,
+any other value will also consider empty cells as errors.
 
 Returns: void */
-void sudoku_print_errors(Grid_T grid, int rules_only);
+void sudoku_print_errors(Grid_T grid, int allow_empty);
 
 
 /* sudoku_is_correct
 
-Checks if the given sudoku is does not violate any rule. The additional
-parameter rules_only controls whether we would want to consider empty
+Checks if the given sudoku does not violate any rule. The additional
+parameter allow_empty controls whether we would want to consider empty
 cells as errors.
 
 Parameters:
 grid: a Grid_T type.
-rules_only: Any value will check only for rules violation, 0 will
-also show all empty cells.
+allow_empty: A value of zero will only check for the standard rules violations,
+any other value will also consider empty cells as errors.
 
 Returns:
-rules_only != 0: 1 if puzzle does not violate rules, else 0.
-rules_only = 0: 1 if puzzle is completed and does not violate rules, else 0. */
-int sudoku_is_correct(Grid_T grid, int rules_only);
+if allow_empty != 0: 1 if puzzle is completed and does not violate rules, else 0.
+if allow_empty = 0: 1 if puzzle does not violate rules, else 0. */
+int sudoku_is_correct(Grid_T grid, int allow_empty);
 
 
 /* sudoku_solve

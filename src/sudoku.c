@@ -248,17 +248,16 @@ static int sudoku_errors_empty(Grid_T grid, int show) {
 
 /* sudoku_print_errors
 
-Writes to stdout all sudoku errors including:
-    Errors related to numbers appearing twice in the same row/column/block.
-    Errors related to empty cells.
+Writes to stdout all sudoku errors. The additional parameter allow_empty
+controls whether we would want to consider empty cells as errors.
 
 Parameters:
 grid: a Grid_T type.
-rules_only: Any non-zero value will print only the cells that violate rules,
-0 will also show all empty cells.
+allow_empty: A value of zero will only show the standard rules violations,
+any other value will also consider empty cells as errors.
 
 Returns: void */
-void sudoku_print_errors(Grid_T grid, int rules_only) {
+void sudoku_print_errors(Grid_T grid, int allow_empty) {
     int i;
 
     /* Show errors related to numbers appearing twice in the same column */
@@ -277,7 +276,7 @@ void sudoku_print_errors(Grid_T grid, int rules_only) {
     }
 
     /* Show errors related to empty cells */
-    if (!rules_only) {
+    if (allow_empty) {
         sudoku_errors_empty(grid, 1);
     }
     return;
@@ -286,19 +285,19 @@ void sudoku_print_errors(Grid_T grid, int rules_only) {
 
 /* sudoku_is_correct
 
-Checks if the given sudoku is does not violate any rule. The additional
-parameter rules_only controls whether we would want to consider empty
+Checks if the given sudoku does not violate any rule. The additional
+parameter allow_empty controls whether we would want to consider empty
 cells as errors.
 
 Parameters:
 grid: a Grid_T type.
-rules_only: Any value will check only for rules violation, 0 will
-also show all empty cells.
+allow_empty: A value of zero will only check for the standard rules violations,
+any other value will also consider empty cells as errors.
 
 Returns:
-rules_only != 0: 1 if puzzle does not violate rules, else 0.
-rules_only = 0: 1 if puzzle is completed and does not violate rules, else 0. */
-int sudoku_is_correct(Grid_T grid, int rules_only) {
+if allow_empty != 0: 1 if puzzle is completed and does not violate rules, else 0.
+if allow_empty = 0: 1 if puzzle does not violate rules, else 0. */
+int sudoku_is_correct(Grid_T grid, int allow_empty) {
     int i;
 
     /* Errors related to sudoku rules */
@@ -311,7 +310,7 @@ int sudoku_is_correct(Grid_T grid, int rules_only) {
     }
 
     /* Errors related to empty cells */
-    if (!rules_only && sudoku_errors_empty(grid, 0)) {
+    if (allow_empty && sudoku_errors_empty(grid, 0)) {
         return 0;
     }
     return 1;
@@ -597,7 +596,7 @@ static Grid_T sudoku_generate_complete(void) {
             sudoku_set_choice(&sudoku, row, col, val);
         }
 
-        if (sudoku_is_correct(sudoku, 0)) {
+        if (sudoku_is_correct(sudoku, 1)) {
             return sudoku;
         }
     }
@@ -745,7 +744,7 @@ Grid_T sudoku_solve(Grid_T grid) {
 
     /* if puzzle violates any rule */
     if (grid_read_rulesok(grid) == -1) {
-        if (sudoku_is_correct(grid, 1)) {
+        if (sudoku_is_correct(grid, 0)) {
             grid_set_rulesok(&grid);
         } else {
             grid_clear_rulesok(&grid);
@@ -780,7 +779,7 @@ Grid_T sudoku_solve(Grid_T grid) {
             grid_copy = sudoku_solve(grid_copy);
 
             /* return the copy if solution is correct */
-            if (sudoku_is_correct(grid_copy, 0)) {
+            if (sudoku_is_correct(grid_copy, 1)) {
                 return grid_copy;
             }
 
@@ -792,7 +791,7 @@ Grid_T sudoku_solve(Grid_T grid) {
     }
 
     /* clear unique flag if puzzle not correct */
-    if (grid_read_unique(grid) && !sudoku_is_correct(grid, 0)) {
+    if (grid_read_unique(grid) && !sudoku_is_correct(grid, 1)) {
         grid_clear_unique(&grid);
     }
     return grid;
