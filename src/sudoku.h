@@ -71,7 +71,9 @@ void sudoku_print_errors(Grid_T grid, int rules_only);
 
 /* sudoku_is_correct
 
-Checks if the given sudoku is fully completed and does not violate any rule.
+Checks if the given sudoku is does not violate any rule. The additional
+parameter rules_only controls whether we would want to consider empty
+cells as errors.
 
 Parameters:
 grid: a Grid_T type.

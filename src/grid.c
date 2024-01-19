@@ -229,7 +229,10 @@ Reads the unique field of grid.
 Parameters:
 grid: a Grid_T type
 
-Returns: 1 if grid has a unique choice solution, 0 when not, -1 otherwise */
+Returns:
+- 1 if grid has a unique choice solution.
+- 0 if it grid does not have a unique choice solution.
+- else -1. */
 int grid_read_unique(Grid_T grid) {
     return grid.unique;
 }
@@ -291,7 +294,7 @@ void grid_reset_unique(Grid_T *grid) {
 /* grid_set_rulesok
 
 Sets the rulesok field of grid to 1, meaning it does not violate any
-sudoku rule. Only rules related to numbers appearing twice are considered.
+sudoku rule.
 
 Checks: if grid is NULL
 
@@ -308,7 +311,7 @@ void grid_set_rulesok(Grid_T *grid) {
 /* grid_clear_rulesok
 
 Sets the rulesok field of grid to 0, meaning it violates at least one
-sudoku rule. Only rules related to numbers appearing twice are considered.
+sudoku rule.
 
 Checks: if grid is NULL
 
@@ -325,7 +328,7 @@ void grid_clear_rulesok(Grid_T *grid) {
 /* grid_reset_rulesok
 
 Sets the rulesok field of grid to -1, meaning it is not known if it violates
-any rules. Only rules related to numbers appearing twice are considered.
+any rules.
 
 Checks: if grid is NULL
 
@@ -341,8 +344,7 @@ void grid_reset_rulesok(Grid_T *grid) {
 
 /* grid_read_rulesok
 
-Reads the rulesok field of grid. Only rules related to numbers appearing
-twice are considered.
+Reads the rulesok field of grid.
 
 Parameters:
 grid: a Grid_T type
@@ -357,7 +359,7 @@ int grid_read_rulesok(Grid_T grid) {
 /* grid_set_initialized
 
 Sets the initialized field of grid to 1, meaning the available choices for each
-cell have been computed and are up to date.
+cell have been computed.
 
 Checks: if grid is NULL
 
@@ -374,7 +376,7 @@ void grid_set_initialized(Grid_T *grid) {
 /* grid_clear_initialized
 
 Sets the initialized field of grid to 0, meaning the available choices for each
-cell have not been computed or are not up to date.
+cell have not been computed.
 
 Checks: if grid is NULL
 
@@ -395,8 +397,8 @@ Reads the initialized field of grid.
 Parameters:
 grid: a Grid_T type
 
-Returns: 1 if the available choices for each cell have been computed and are
-up to date, 0 otherwise */
+Returns: 1 if the available choices for each cell have been computed,
+0 otherwise */
 int grid_is_initialized(Grid_T grid) {
     return grid.initialized;
 }
@@ -404,7 +406,7 @@ int grid_is_initialized(Grid_T grid) {
 
 /* grid_set_formatok
 
-Sets the formatok field of grid to 1, meaning all grid cells have valid values.
+Sets the formatok field of grid to 1, meaning all cells have valid values.
 
 Checks: if grid is NULL
 

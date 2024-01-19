@@ -12,7 +12,6 @@ static Grid_T sudoku_generate_complete(void);
 static void sudoku_init_choices(Grid_T *grid);
 static void sudoku_set_choice(Grid_T *grid, int row, int col, int val);
 static int sudoku_try_next(Grid_T grid, int *row, int *col);
-static void sudoku_set_rules(Grid_T *grid);
 static int sudoku_errors_rules(Grid_T grid, int show, int index, int type);
 static int sudoku_errors_empty(Grid_T grid, int show);
 
@@ -287,7 +286,9 @@ void sudoku_print_errors(Grid_T grid, int rules_only) {
 
 /* sudoku_is_correct
 
-Checks if the given sudoku is fully completed and does not violate any rule.
+Checks if the given sudoku is does not violate any rule. The additional
+parameter rules_only controls whether we would want to consider empty
+cells as errors.
 
 Parameters:
 grid: a Grid_T type.
@@ -298,12 +299,15 @@ Returns:
 rules_only != 0: 1 if puzzle does not violate rules, else 0.
 rules_only = 0: 1 if puzzle is completed and does not violate rules, else 0. */
 int sudoku_is_correct(Grid_T grid, int rules_only) {
+    int i;
 
-    /* Errors related to numbers appearing twice in the same 
-    row/column/clock */
-    sudoku_set_rules(&grid);
-    if (!grid_read_rulesok(grid)) {
-        return 0;
+    /* Errors related to sudoku rules */
+    for (i = 0; i < SIZE; i++) {
+        if (sudoku_errors_rules(grid, 0, i, 0) ||    /* column conflict */
+            sudoku_errors_rules(grid, 0, i, 1) ||    /* row conflict */
+            sudoku_errors_rules(grid, 0, i, 2)) {    /* block conflict */
+                return 0;
+        }
     }
 
     /* Errors related to empty cells */
@@ -368,35 +372,6 @@ static void sudoku_init_choices(Grid_T *grid) {
             }
         }
     }
-    return;
-}
-
-
-/* sudoku_set_rules
-
-Modifies the rulesok field of the given sudoku. It sets it to 1
-if grid does not violate any sudoku rule and to 0 if it does violate a
-rule. Only rules related to numbers appearing twice are considered.
-
-Checks: if grid is NULL.
-
-Parameters:
-grid: a pointer to a Grid_T type.
-
-Returns: void */
-static void sudoku_set_rules(Grid_T *grid) {
-    int i;
-
-    assert(grid);
-    for (i = 0; i < SIZE; i++) {
-        if (sudoku_errors_rules(*grid, 0, i, 0) ||    /* column conflict */
-            sudoku_errors_rules(*grid, 0, i, 1) ||    /* row conflict */
-            sudoku_errors_rules(*grid, 0, i, 2)) {    /* block conflict */
-                grid_clear_rulesok(grid);
-                return;
-        }
-    }
-    grid_set_rulesok(grid);
     return;
 }
 
@@ -596,11 +571,11 @@ static Grid_T sudoku_generate_complete(void) {
     int choice, row, col, val, tries;
     Grid_T sudoku;
 
-    grid_set_unique(&sudoku);
-    grid_set_rulesok(&sudoku);
-    grid_clear_initialized(&sudoku);
     grid_set_formatok(&sudoku);
-    
+    grid_reset_unique(&sudoku);
+    grid_reset_rulesok(&sudoku);
+    grid_clear_initialized(&sudoku);
+
     /* try to generate a full puzzle 20 times */
     for (tries = 0; tries < 20; tries++) {
 
@@ -770,7 +745,11 @@ Grid_T sudoku_solve(Grid_T grid) {
 
     /* if puzzle violates any rule */
     if (grid_read_rulesok(grid) == -1) {
-        sudoku_set_rules(&grid);
+        if (sudoku_is_correct(grid, 1)) {
+            grid_set_rulesok(&grid);
+        } else {
+            grid_clear_rulesok(&grid);
+        }
     }
 
     /* if grid violates sudoku rules */
