@@ -6,7 +6,8 @@ The following functions are provided:
 
 * sudoku_read(): Read a puzzle
 * sudoku_print(puzzle): Print puzzle
-* sudoku_print_errors(puzzle): Print puzzle issues (rules violation, empty cells)
+* sudoku_print_errors(puzzle): Print rule-related errors of puzzle
+* sudoku_print_empty(puzzle): Print the empty cells of puzzle
 * sudoku_format_is_correct(puzzle): Show whether puzzle meets the required format
 * sudoku_is_correct(puzzle): Check whether puzzle has issues (rules violation, empty cells)
 * sudoku_solve(puzzle): Solve puzzle

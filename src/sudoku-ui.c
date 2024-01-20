@@ -49,11 +49,9 @@ int main(int argc, char **argv) {
             fprintf(stdout, "Puzzle has incorrect format. Exiting...\n");
             return 0;
         }
-        fprintf(stderr, "Input puzzle:\n");
         sudoku_print(sudoku);
         if (!sudoku_is_correct(sudoku, 0)) {
-            fprintf(stdout, "Puzzle violates rules:\n");
-            sudoku_print_errors(sudoku, 0);
+            sudoku_print_errors(sudoku);
             return 0;
         }
         sudoku_solved = sudoku_solve(sudoku);
@@ -62,7 +60,7 @@ int main(int argc, char **argv) {
             return 0;
         }
         if (sudoku_has_unique_choice_solution(sudoku_solved)) {
-            fprintf(stdout, "Puzzle has one (unique choice) solution:\n");
+            fprintf(stdout, "Puzzle has a unique solution:\n");
         }
         else {
             fprintf(stdout, "Puzzle has a solution (multiple solutions may exist):\n");
@@ -73,10 +71,10 @@ int main(int argc, char **argv) {
         nelts = atoi(argv[2]);
         sudoku = sudoku_generate(nelts);
         if (sudoku_has_unique_choice_solution(sudoku)) {
-            fprintf(stderr, "Generating (unique choice) solvable puzzle...\n");
+            fprintf(stderr, "Generating a puzzle that has a unique solution...\n");
         }
         else {
-            fprintf(stderr, "Generating solvable puzzle (multiple solutions may exist)...\n");
+            fprintf(stderr, "Generating a puzzle that may have multiple solutions...\n");
         }
         sudoku_print(sudoku);
     }
@@ -90,12 +88,11 @@ int main(int argc, char **argv) {
         if (!strcmp(argv[1], "-s")) { /* -s */
             return 0;
         }
-        if (!sudoku_is_correct(sudoku, 1)) {
-            fprintf(stderr, "Issues found:\n");
-            sudoku_print_errors(sudoku, 1);
-        }
-        else {
-             fprintf(stderr, "No issues found\n");
+        if (sudoku_is_correct(sudoku, 1)) {
+            fprintf(stderr, "No issues found\n");
+        } else {
+            sudoku_print_errors(sudoku);
+            sudoku_print_empty(sudoku);
         }
     }
     return 0;

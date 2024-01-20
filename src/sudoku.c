@@ -92,7 +92,9 @@ int sudoku_format_is_correct(Grid_T grid) {
 }
 
 
-/* sudoku_print: Writes a sudoku puzzle grid to stdout.
+/* sudoku_print:
+
+Writes the given sudoku to stdout.
 
 The format is 9 numbers per line. After each number there is a space char.
 Empty cells are denoted by a dot char. After the last cell in each line there
@@ -126,8 +128,7 @@ void sudoku_print(Grid_T grid) {
 /* sudoku_errors_rules
 
 Writes to stdout the sudoku errors that appear in the row or
-column or block indicated by index. Only errors related to numbers
-appearing twice are considered.
+column or block indicated by index.
 
 Parameters:
 grid: a Grid_T type.
@@ -248,37 +249,44 @@ static int sudoku_errors_empty(Grid_T grid, int show) {
 
 /* sudoku_print_errors
 
-Writes to stdout all sudoku errors. The additional parameter allow_empty
-controls whether we would want to consider empty cells as errors.
+Writes to stdout all rule-related errors of the given sudoku.
 
 Parameters:
 grid: a Grid_T type.
-allow_empty: A value of zero will only show the standard rules violations,
-any other value will also consider empty cells as errors.
 
 Returns: void */
-void sudoku_print_errors(Grid_T grid, int allow_empty) {
+void sudoku_print_errors(Grid_T grid) {
     int i;
 
-    /* Show errors related to numbers appearing twice in the same column */
+    /* Errors related to numbers appearing twice in the same column */
     for (i = 0; i < SIZE; i++) {
         sudoku_errors_rules(grid, 1, i, 0);
     }
 
-    /* Show errors related to numbers appearing twice in the same row */
+    /* Errors related to numbers appearing twice in the same row */
     for (i = 0; i < SIZE; i++) {
         sudoku_errors_rules(grid, 1, i, 1);
     }
 
-    /* Show errors related to numbers appearing twice in the same block */
+    /* Errors related to numbers appearing twice in the same block */
     for (i = 0; i < SIZE; i++) {
         sudoku_errors_rules(grid, 1, i, 2);
     }
 
-    /* Show errors related to empty cells */
-    if (allow_empty) {
-        sudoku_errors_empty(grid, 1);
-    }
+    return;
+}
+
+
+/* sudoku_print_empty
+
+Writes to stdout all empty cells of the given sudoku.
+
+Parameters:
+grid: a Grid_T type.
+
+Returns: void */
+void sudoku_print_empty(Grid_T grid) {
+    sudoku_errors_empty(grid, 1);
     return;
 }
 

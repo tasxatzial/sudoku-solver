@@ -41,7 +41,9 @@ Returns: 1 if the format is OK, 0 otherwise */
 int sudoku_format_is_correct(Grid_T grid);
 
 
-/* sudoku_print: Writes a sudoku puzzle grid to stdout.
+/* sudoku_print:
+
+Writes the given sudoku to stdout.
 
 The format is 9 numbers per line. After each number there is a space char.
 Empty cells are denoted by a dot char. After the last cell in each line there
@@ -56,16 +58,24 @@ void sudoku_print(Grid_T grid);
 
 /* sudoku_print_errors
 
-Writes to stdout all sudoku errors. The additional parameter allow_empty
-controls whether we would want to consider empty cells as errors.
+Writes to stdout all rule-related errors of the given sudoku.
 
 Parameters:
 grid: a Grid_T type.
-allow_empty: A value of zero will only show the standard rules violations,
-any other value will also consider empty cells as errors.
 
 Returns: void */
-void sudoku_print_errors(Grid_T grid, int allow_empty);
+void sudoku_print_errors(Grid_T grid);
+
+
+/* sudoku_print_empty
+
+Writes to stdout all empty cells of the given sudoku.
+
+Parameters:
+grid: a Grid_T type.
+
+Returns: void */
+void sudoku_print_empty(Grid_T grid);
 
 
 /* sudoku_is_correct
