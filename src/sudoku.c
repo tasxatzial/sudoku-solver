@@ -20,7 +20,7 @@ static int sudoku_errors_empty(Grid_T grid, int show);
 
 The accepted format is 9 numbers per line. After each number there is a space
 char. Empty cells are denoted by a dot char. After the last cell in each line
-there is a LF char.
+there is a LF char. Throws assertion error if format is not met.
 
 Example:
 1 . . . . 7 . 9 .
@@ -44,11 +44,8 @@ Grid_T sudoku_read(void) {
         if (i != 0) {
             val = getchar();
 
-            /* check if we read a LF */
-            if (val != 10) {
-                grid_clear_formatok(&sudoku);
-                return sudoku;
-            }
+            /* must be a LF */
+            assert(val == 10);
         }
         for (j = 0; j < SIZE; j++) {
             val = getchar();
@@ -62,16 +59,13 @@ Grid_T sudoku_read(void) {
             if (val == '.') {
                 val = '0';
             }
-            
-            /* check if we are reading a digit */
-            if (val < 48 || val > 57) {
-                grid_clear_formatok(&sudoku);
-                return sudoku;
-            }
+
+            /* must be a digit between 0 and 9 */
+            assert (val >= 48 && val <= 57);
+
             grid_update_value(&sudoku, i, j, val - '0');
         }
     }
-    grid_set_formatok(&sudoku);
     grid_reset_unique(&sudoku);
     grid_reset_rulesok(&sudoku);
     grid_clear_initialized(&sudoku);
@@ -88,7 +82,16 @@ grid: a Grid_T type.
 
 Returns: 1 if the format is OK, 0 otherwise */
 int sudoku_format_is_correct(Grid_T grid) {
-    return grid_read_formatok(grid);
+    int i, j, val;
+    for (i = 0; i < SIZE; i++) {
+        for (j = 0; j < SIZE; j++) {
+            val = grid_read_value(grid, i, j);
+            if (val < 0 || val > SIZE) {
+                return 0;
+            }
+        }
+    }
+    return 1;
 }
 
 
@@ -578,7 +581,6 @@ static Grid_T sudoku_generate_complete(void) {
     int choice, row, col, val, tries;
     Grid_T sudoku;
 
-    grid_set_formatok(&sudoku);
     grid_reset_unique(&sudoku);
     grid_reset_rulesok(&sudoku);
     grid_clear_initialized(&sudoku);

@@ -11,7 +11,7 @@
 
 The accepted format is 9 numbers per line. After each number there is a space
 char. Empty cells are denoted by a dot char. After the last cell in each line
-there is a LF char.
+there is a LF char.  Throws assertion error if format is not met.
 
 Example:
 1 . . . . 7 . 9 .
